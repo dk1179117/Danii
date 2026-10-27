@@ -1,0 +1,3814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sakina — Aesthetic Digital Tasbih & Dhikr</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Amiri & Scheherazade New for Arabic, Plus Jakarta Sans & Cormorant Garamond for UI -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #06131c;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #ffffff;
+        }
+
+        .arabic-font {
+            font-family: 'Amiri', serif;
+            line-height: 1.55;
+        }
+
+        /* Subtle breathing glow for Arabic calligraphy */
+        @keyframes calligraphyGlow {
+            0%, 100% {
+                filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.35)) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.45));
+            }
+            50% {
+                filter: drop-shadow(0 0 24px rgba(186, 230, 253, 0.65)) drop-shadow(0 4px 16px rgba(0, 0, 0, 0.55));
+            }
+        }
+
+        .arabic-glow {
+            animation: calligraphyGlow 4.5s ease-in-out infinite;
+        }
+
+        /* Counter pulse animation */
+        @keyframes counterBump {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+
+        .counter-bump {
+            animation: counterBump 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* 4K Download Button Shimmer */
+        @keyframes goldShimmer {
+            0%, 100% {
+                box-shadow: 0 0 18px rgba(56, 189, 248, 0.45), inset 0 0 12px rgba(255, 255, 255, 0.2);
+            }
+            50% {
+                box-shadow: 0 0 28px rgba(250, 204, 21, 0.7), inset 0 0 16px rgba(255, 255, 255, 0.35);
+            }
+        }
+
+        .btn-4k-glow {
+            animation: goldShimmer 2.4s ease-in-out infinite;
+        }
+
+        /* Custom Glassmorphism */
+        .glass-panel {
+            background: rgba(10, 25, 38, 0.55);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+        }
+
+        .glass-pill {
+            background: rgba(12, 28, 42, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.25s ease;
+        }
+
+        .glass-pill:hover {
+            background: rgba(25, 50, 72, 0.78);
+            border-color: rgba(255, 255, 255, 0.28);
+        }
+
+        .glass-pill:active {
+            transform: scale(0.95);
+        }
+
+        /* Smooth transitions for Zen Mode */
+        .ui-chrome {
+            transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1), transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .zen-hidden {
+            opacity: 0 !important;
+            pointer-events: none !important;
+            transform: translateY(-10px);
+        }
+
+        .zen-hidden-bottom {
+            opacity: 0 !important;
+            pointer-events: none !important;
+            transform: translateY(15px);
+        }
+
+        /* Custom Scrollbar for Modals */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.04);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="relative flex items-center justify-center w-full h-full select-none overflow-hidden">
+
+    <!-- Fullscreen Interactive Canvas (Background Scene + Curved 3D Tasbih Beads) -->
+    <canvas id="sceneCanvas" class="absolute inset-0 w-full h-full block cursor-pointer z-0"></canvas>
+
+    <!-- Main Mobile-First Vertical Stage Container (9:16 Reel proportion on desktop, full screen on mobile) -->
+    <div id="appStage" class="relative z-10 w-full h-full max-w-[460px] flex flex-col justify-between pointer-events-none px-3.5 py-3 sm:px-4 sm:py-6">
+
+        <!-- TOP BAR: Controls & Theme Switcher (Hidden in Zen/Video Mode) -->
+        <header id="topChrome" class="ui-chrome flex items-center justify-between gap-1.5 pointer-events-auto w-full z-20">
+            <!-- Left: Dhikr Selector Button -->
+            <button id="openDhikrModalBtn" class="glass-pill flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-sky-100 shadow-lg max-w-[145px] sm:max-w-[200px]">
+                <svg class="w-3.5 h-3.5 text-sky-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/>
+                </svg>
+                <span id="currentDhikrChip" class="truncate">Astaghfirullah</span>
+                <svg class="w-3 h-3 opacity-70 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+
+            <!-- Right: Quick Action Icons (Goal/Time, Theme, Audio, Mute, Zen Mode) -->
+            <div class="flex items-center gap-1 shrink-0">
+                <!-- Manual Time & Goal Setup Button -->
+                <button id="openGoalModalBtn" title="Set Manual Goal & Time" class="glass-pill px-2.5 py-1.5 rounded-full text-[11px] font-semibold text-amber-200 shadow-lg flex items-center gap-1 whitespace-nowrap">
+                    <svg class="w-3.5 h-3.5 text-amber-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>Goal/Time</span>
+                </button>
+
+                <!-- Theme Switcher Button -->
+                <button id="themeBtn" title="Switch Atmosphere Theme" class="glass-pill w-8 h-8 flex items-center justify-center rounded-full text-sky-100 shadow-lg relative">
+                    <span id="themeIcon" class="block text-xs leading-none">🌧️</span>
+                </button>
+
+                <!-- Sound Profile Cycle Button -->
+                <button id="soundProfileBtn" title="Change Ambient & Bead Sound Style" class="glass-pill w-8 h-8 sm:w-auto sm:px-2.5 flex items-center justify-center gap-1 rounded-full text-xs font-medium text-sky-100 shadow-lg">
+                    <span id="soundEmoji" class="text-xs leading-none">🎵</span>
+                    <span id="soundNameShort" class="hidden sm:inline text-[11px]">Vocal+Rain</span>
+                </button>
+
+                <!-- Ambient Sound + Bead Click Sound Mute Toggle -->
+                <button id="soundBtn" title="Mute / Unmute Sound" class="glass-pill w-8 h-8 flex items-center justify-center rounded-full text-sky-100 shadow-lg">
+                    <svg id="soundOnIcon" class="w-3.5 h-3.5 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+                    </svg>
+                    <svg id="soundOffIcon" class="w-3.5 h-3.5 text-rose-300 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>
+                    </svg>
+                </button>
+
+                <!-- Zen / Clean Reel Mode Toggle -->
+                <button id="zenModeBtn" title="Clean Video Mode (Hide Controls)" class="glass-pill w-8 h-8 flex items-center justify-center rounded-full text-sky-100 shadow-lg">
+                    <svg class="w-3.5 h-3.5 text-sky-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- TOP-CENTER: Arabic Calligraphy, Diamond Divider, Transliteration & Meaning -->
+        <div class="flex flex-col items-center text-center mt-6 sm:mt-7 px-2 pointer-events-none">
+            <!-- Arabic Script -->
+            <h1 id="arabicText" dir="rtl" class="arabic-font arabic-glow text-5xl sm:text-6xl font-bold text-white tracking-wide mb-3 select-none">
+                أَسْتَغْفِرُ اللّٰهَ
+            </h1>
+
+            <!-- Ornamental Divider Line with Glowing Diamond -->
+            <div class="flex items-center justify-center w-52 sm:w-60 my-1.5 opacity-90">
+                <div class="h-[1px] flex-1 bg-gradient-to-r from-transparent via-slate-300/60 to-slate-200/80"></div>
+                <div id="dividerDiamond" class="w-2.5 h-2.5 rotate-45 mx-3 bg-sky-300 shadow-[0_0_10px_#7dd3fc] transition-colors duration-500"></div>
+                <div class="h-[1px] flex-1 bg-gradient-to-l from-transparent via-slate-300/60 to-slate-200/80"></div>
+            </div>
+
+            <!-- Transliteration -->
+            <h2 id="transliterationText" class="text-xl sm:text-2xl font-semibold text-white tracking-wide mt-1 drop-shadow-md">
+                Astaghfirullah
+            </h2>
+
+            <!-- English Translation -->
+            <p id="translationText" class="text-xs sm:text-sm text-slate-200/80 font-normal mt-0.5 tracking-wide max-w-xs drop-shadow">
+                I seek forgiveness from Allah
+            </p>
+        </div>
+
+        <!-- MIDDLE SPACER: Reserved for the Canvas Curved 3D Tasbih Beads & Center Target Ring -->
+        <div class="flex-1 flex items-center justify-center pointer-events-none">
+            <!-- Canvas renders the curved cord, glowing target circle, beads, tassels, and +1 floaters right in this visual zone -->
+        </div>
+
+        <!-- LOWER-MIDDLE: Circular Progress Counter + Acceptance Blessing + Watermark -->
+        <div class="flex flex-col items-center justify-end pb-1 pointer-events-none">
+
+            <!-- Circular Counter Badge (Matches video & screenshot) -->
+            <div id="counterWrapper" class="relative w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center pointer-events-auto cursor-pointer group" title="Tap to count">
+                <!-- Outer soft glow -->
+                <div id="counterGlow" class="absolute inset-1 rounded-full bg-sky-400/15 blur-md group-active:bg-sky-400/30 transition-all"></div>
+
+                <!-- Dark Glass Circle + Progress SVG -->
+                <svg class="w-full h-full -rotate-90 transform drop-shadow-[0_8px_20px_rgba(0,0,0,0.5)]" viewBox="0 0 110 110">
+                    <defs>
+                        <linearGradient id="ringGradRain" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#bae6fd" />
+                            <stop offset="50%" stop-color="#38bdf8" />
+                            <stop offset="100%" stop-color="#6366f1" />
+                        </linearGradient>
+                        <linearGradient id="ringGradSunset" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#fde68a" />
+                            <stop offset="50%" stop-color="#fb923c" />
+                            <stop offset="100%" stop-color="#f43f5e" />
+                        </linearGradient>
+                        <linearGradient id="ringGradEmerald" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#a7f3d0" />
+                            <stop offset="50%" stop-color="#34d399" />
+                            <stop offset="100%" stop-color="#0ea5e9" />
+                        </linearGradient>
+                        <linearGradient id="ringGradMadinah" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#fef08a" />
+                            <stop offset="50%" stop-color="#eab308" />
+                            <stop offset="100%" stop-color="#10b981" />
+                        </linearGradient>
+                        <linearGradient id="ringGradSakura" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#fecdd3" />
+                            <stop offset="50%" stop-color="#f472b6" />
+                            <stop offset="100%" stop-color="#a855f7" />
+                        </linearGradient>
+                        <linearGradient id="ringGradAurora" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#6ee7b7" />
+                            <stop offset="50%" stop-color="#38bdf8" />
+                            <stop offset="100%" stop-color="#c084fc" />
+                        </linearGradient>
+                    </defs>
+                    <!-- Inner Dark Circle Fill -->
+                    <circle cx="55" cy="55" r="44" fill="rgba(12, 26, 38, 0.72)" />
+                    <!-- Track Ring -->
+                    <circle cx="55" cy="55" r="46" fill="none" stroke="rgba(255, 255, 255, 0.14)" stroke-width="4.5" />
+                    <!-- Animated Progress Ring -->
+                    <circle id="progressRing" cx="55" cy="55" r="46" fill="none"
+                        stroke="url(#ringGradRain)"
+                        stroke-width="4.5"
+                        stroke-linecap="round"
+                        stroke-dasharray="289.026"
+                        stroke-dashoffset="289.026"
+                        class="transition-all duration-300 ease-out"
+                        style="filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.8));" />
+                </svg>
+
+                <!-- Counter Numbers Inside Circle -->
+                <div class="absolute inset-0 flex flex-col items-center justify-center text-center pt-1">
+                    <span id="countNumber" class="text-3xl sm:text-4xl font-extrabold text-white leading-none tracking-tight">0</span>
+                    <span id="targetNumber" class="text-[11px] sm:text-xs font-medium text-slate-300/80 mt-0.5">/ 100</span>
+                </div>
+            </div>
+
+            <!-- Completion Blessing Area + 4K Download Button (Appears upon reaching target goal) -->
+            <div id="completionBlessing" class="min-h-[86px] flex flex-col items-center justify-center text-center mt-1.5 transition-all duration-500 opacity-0 translate-y-2 pointer-events-none z-30">
+                <p dir="rtl" class="arabic-font text-xl sm:text-2xl text-sky-100 drop-shadow-[0_0_10px_rgba(186,230,253,0.6)]">
+                    تَقَبَّلَ اللّٰهُ مِنَّا وَمِنْكُمْ
+                </p>
+                <p class="text-[11px] sm:text-xs text-slate-200/85 tracking-wide mt-0.5">
+                    May Allah accept it from us and from you
+                </p>
+
+                <!-- 4K Download Action Row (Active when goal is completed) -->
+                <div id="downloadActionRow" class="flex flex-wrap items-center justify-center gap-2 mt-2 pointer-events-auto">
+                    <button id="downloadVideoBtn" type="button" class="btn-4k-glow bg-gradient-to-r from-emerald-500 via-teal-500 to-sky-500 hover:from-emerald-400 hover:to-sky-400 text-white font-bold text-xs px-4 py-2 rounded-full flex items-center gap-1.5 shadow-xl transition-transform active:scale-95 cursor-pointer">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                        </svg>
+                        <span id="downloadVideoBtnText">Download 4K Video</span>
+                    </button>
+
+                    <button id="download4kBtn" type="button" class="glass-pill px-3.5 py-2 rounded-full text-xs font-semibold text-amber-200 border border-amber-400/50 flex items-center gap-1.5 shadow-lg transition-transform active:scale-95 cursor-pointer">
+                        <svg class="w-3.5 h-3.5 text-amber-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        <span id="download4kBtnText">4K Image</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Subtle Signature / Custom Handle (Editable on click) -->
+            <button id="watermarkBtn" title="Click to customize signature" class="pointer-events-auto text-xs text-slate-200/65 hover:text-white/90 tracking-wider font-medium mt-0.5 mb-2 transition-opacity">
+                @zyva
+            </button>
+
+            <!-- BOTTOM CONTROL BAR (Auto-Play, Bead Color, Target, Reset) -->
+            <div id="bottomChrome" class="ui-chrome flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 pointer-events-auto w-full mt-0.5">
+                <!-- Auto-Play / Reel Mode Button -->
+                <button id="autoPlayBtn" class="glass-pill flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold text-sky-100 shadow-lg">
+                    <svg id="playIcon" class="w-3.5 h-3.5 text-sky-300 fill-current" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    <svg id="pauseIcon" class="w-3.5 h-3.5 text-amber-300 fill-current hidden" viewBox="0 0 24 24">
+                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                    </svg>
+                    <span id="autoPlayLabel">Auto Dhikr</span>
+                </button>
+
+                <!-- Auto Speed Button (Opens manual or cycles) -->
+                <button id="speedBtn" title="Change Auto-Dhikr Speed" class="glass-pill px-2.5 py-2 rounded-full text-xs font-semibold text-slate-200 shadow-lg">
+                    1.2s
+                </button>
+
+                <!-- Target Button (Opens manual goal modal) -->
+                <button id="targetCycleBtn" title="Set Target Goal" class="glass-pill px-2.5 py-2 rounded-full text-xs font-semibold text-slate-200 shadow-lg">
+                    Goal: 100
+                </button>
+
+                <!-- Bead Style & Shape Cycle Button -->
+                <button id="beadStyleBtn" title="Change Tasbih Bead Gem & Shape Design" class="glass-pill px-2.5 py-2 rounded-full text-xs font-semibold text-slate-200 shadow-lg flex items-center gap-1.5">
+                    <span id="beadColorDot" class="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block shadow-[0_0_6px_#22d3ee]"></span>
+                    <span id="beadStyleLabel">Pearl</span>
+                </button>
+
+                <!-- Reset Button -->
+                <button id="resetBtn" title="Reset Counter" class="glass-pill p-2 rounded-full text-slate-300 hover:text-rose-200 shadow-lg">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Exit Zen Mode Button (Only visible when Zen Mode is active) -->
+    <button id="exitZenBtn" class="fixed top-4 right-4 z-30 glass-pill px-3.5 py-1.5 rounded-full text-xs font-medium text-white/80 shadow-lg hidden items-center gap-1.5 pointer-events-auto">
+        <svg class="w-3.5 h-3.5 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+        </svg>
+        <span>Show Controls</span>
+    </button>
+
+    <!-- DHIKR & CUSTOMIZATION MODAL -->
+    <div id="dhikrModal" class="fixed inset-0 z-40 bg-black/65 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-md rounded-3xl p-5 sm:p-6 text-white shadow-2xl border border-white/15 max-h-[88vh] flex flex-col">
+            <div class="flex items-center justify-between pb-3 border-b border-white/10">
+                <div>
+                    <h3 class="text-lg font-bold text-white">Select Dhikr & Atmosphere</h3>
+                    <p class="text-xs text-slate-300">Choose a remembrance or create your own</p>
+                </div>
+                <button id="closeModalBtn" class="p-2 rounded-full hover:bg-white/10 text-slate-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Preset Dhikr List -->
+            <div id="dhikrListContainer" class="flex-1 overflow-y-auto space-y-2.5 my-4 pr-1">
+                <!-- Populated dynamically via JS -->
+            </div>
+
+            <!-- Custom Dhikr & Handle Input Section -->
+            <div class="pt-3 border-t border-white/10 space-y-3">
+                <p class="text-xs font-semibold uppercase tracking-wider text-sky-300">Custom Dhikr / Watermark</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <input id="customArabicInput" type="text" dir="rtl" placeholder="Arabic (e.g. يَا اللّٰهُ)" class="bg-slate-900/70 border border-white/15 rounded-xl px-3 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-sky-400">
+                    <input id="customTitleInput" type="text" placeholder="Title (e.g. Ya Allah)" class="bg-slate-900/70 border border-white/15 rounded-xl px-3 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-sky-400">
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <input id="customMeaningInput" type="text" placeholder="Meaning / Translation" class="col-span-2 bg-slate-900/70 border border-white/15 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-sky-400">
+                    <input id="customWatermarkInput" type="text" placeholder="@zyva" value="@zyva" class="bg-slate-900/70 border border-white/15 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-sky-400">
+                </div>
+                <button id="applyCustomBtn" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-400 hover:to-indigo-400 text-white font-semibold text-xs shadow-lg transition-all">
+                    Apply Custom Text & Handle
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MANUAL GOAL, TIME, THEME & SOUND STUDIO MODAL -->
+    <div id="goalTimeModal" class="fixed inset-0 z-40 bg-black/70 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-md rounded-3xl p-5 sm:p-6 text-white shadow-2xl border border-white/15 max-h-[90vh] overflow-y-auto space-y-4">
+            <div class="flex items-center justify-between pb-2.5 border-b border-white/10">
+                <div>
+                    <h3 class="text-lg font-bold text-white">Manual Goal, Time & Studio</h3>
+                    <p class="text-xs text-slate-300">Customize target count, timer, theme, design & sound</p>
+                </div>
+                <button id="closeGoalModalBtn" type="button" class="p-2 rounded-full hover:bg-white/10 text-slate-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- 1. MANUAL TARGET GOAL -->
+            <div class="space-y-2">
+                <label class="text-xs font-semibold uppercase tracking-wider text-amber-300 block">1. Set Manual Target Goal (Beads)</label>
+                <div class="flex items-center gap-2">
+                    <input id="manualGoalInput" type="number" min="1" max="10000" value="100" class="w-28 bg-slate-900/80 border border-white/20 rounded-xl px-3 py-2 text-base font-bold text-white focus:outline-none focus:border-amber-400" />
+                    <div class="flex flex-wrap gap-1.5 flex-1">
+                        <button type="button" data-quick-goal="7" class="quick-goal-btn glass-pill px-2.5 py-1.5 rounded-lg text-xs font-semibold text-sky-100">7</button>
+                        <button type="button" data-quick-goal="11" class="quick-goal-btn glass-pill px-2.5 py-1.5 rounded-lg text-xs font-semibold text-sky-100">11</button>
+                        <button type="button" data-quick-goal="33" class="quick-goal-btn glass-pill px-2.5 py-1.5 rounded-lg text-xs font-semibold text-sky-100">33</button>
+                        <button type="button" data-quick-goal="100" class="quick-goal-btn glass-pill px-2.5 py-1.5 rounded-lg text-xs font-semibold text-sky-100">100</button>
+                        <button type="button" data-quick-goal="313" class="quick-goal-btn glass-pill px-2.5 py-1.5 rounded-lg text-xs font-semibold text-sky-100">313</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. MANUAL TIME / AUTO-DHIKR PACE -->
+            <div class="space-y-2 pt-2 border-t border-white/10">
+                <div class="flex items-center justify-between">
+                    <label class="text-xs font-semibold uppercase tracking-wider text-sky-300">2. Set Manual Time / Speed</label>
+                    <span id="calculatedTimeHint" class="text-[11px] text-amber-200 font-medium">Total: ~2m 0s</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <span class="text-[11px] text-slate-300 block mb-1">Seconds per Bead (0.2s - 10s)</span>
+                        <input id="manualSpeedSecInput" type="number" step="0.1" min="0.2" max="10" value="1.2" class="w-full bg-slate-900/80 border border-white/20 rounded-xl px-3 py-2 text-sm font-semibold text-white focus:outline-none focus:border-sky-400" />
+                    </div>
+                    <div>
+                        <span class="text-[11px] text-slate-300 block mb-1">Or Total Duration (Seconds)</span>
+                        <input id="manualTotalDurationInput" type="number" step="1" min="2" max="7200" placeholder="e.g. 60" class="w-full bg-slate-900/80 border border-white/20 rounded-xl px-3 py-2 text-sm font-semibold text-white placeholder-slate-500 focus:outline-none focus:border-sky-400" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. SELECT SCENE THEME (15 ISLAMIC & NATURE DESIGNS) -->
+            <div class="space-y-2 pt-2 border-t border-white/10">
+                <label class="text-xs font-semibold uppercase tracking-wider text-emerald-300 block">3. Islamic & Nature Atmosphere Themes (15 Designs)</label>
+                <div id="themeSelectorGrid" class="grid grid-cols-2 gap-2 max-h-44 overflow-y-auto pr-1">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+
+            <!-- 4. SELECT SOUND PROFILE & BEAD DESIGN -->
+            <div class="grid grid-cols-2 gap-2.5 pt-2 border-t border-white/10">
+                <div>
+                    <label class="text-[11px] font-semibold uppercase tracking-wider text-purple-300 block mb-1.5">4. Sound & Countdown</label>
+                    <select id="soundProfileSelect" class="w-full bg-slate-900/80 border border-white/15 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:border-purple-400">
+                        <!-- Populated via JS -->
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[11px] font-semibold uppercase tracking-wider text-cyan-300 block mb-1.5">5. Tasbih Design (8 Styles)</label>
+                    <select id="beadDesignSelect" class="w-full bg-slate-900/80 border border-white/15 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:border-cyan-400">
+                        <!-- Populated via JS -->
+                    </select>
+                </div>
+            </div>
+
+            <!-- Save & Start Buttons -->
+            <div class="flex items-center gap-2 pt-2">
+                <button id="saveGoalSettingsBtn" class="flex-1 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white font-semibold text-xs transition-all">
+                    Save Settings
+                </button>
+                <button id="saveAndStartAutoBtn" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-400 hover:to-indigo-400 text-white font-bold text-xs shadow-lg transition-all">
+                    Save & Start Auto Dhikr
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4K VIDEO & IMAGE READY DOWNLOAD / SAVE MODAL (Guarantees download on all mobile browsers & WebViews) -->
+    <div id="downloadReadyModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-sm rounded-3xl p-5 text-white shadow-2xl border border-emerald-400/30 flex flex-col items-center text-center space-y-3">
+            <div class="w-full flex items-center justify-between border-b border-white/10 pb-2.5">
+                <div class="text-left">
+                    <h3 id="dlModalTitle" class="text-base font-bold text-emerald-300">4K Goal Video Ready!</h3>
+                    <p id="dlModalSubtitle" class="text-[11px] text-slate-300">Tap Save below or use player menu to download</p>
+                </div>
+                <button id="closeDlModalBtn" type="button" class="p-1.5 rounded-full hover:bg-white/10 text-slate-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Live Video / Image Preview Container -->
+            <div class="relative w-48 aspect-[9/16] rounded-2xl overflow-hidden border border-white/20 bg-slate-950 shadow-xl flex items-center justify-center">
+                <video id="dlVideoPreview" controls playsinline loop class="w-full h-full object-cover hidden"></video>
+                <img id="dlImagePreview" alt="4K Goal Preview" class="w-full h-full object-cover hidden" />
+                <div id="dlRenderingSpinner" class="flex flex-col items-center justify-center p-4 space-y-2">
+                    <div class="w-8 h-8 border-3 border-sky-400 border-t-transparent rounded-full animate-spin"></div>
+                    <span id="dlProgressLabel" class="text-xs font-semibold text-sky-200">Rendering 4K Video...</span>
+                </div>
+            </div>
+
+            <!-- Direct Instant Anchor Save & Native Mobile Share Buttons -->
+            <div class="w-full flex flex-col gap-2 pt-1">
+                <a id="directDownloadLink" href="#" download="Sakina-4K-Goal-Video.mp4" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-sky-500 hover:from-emerald-400 hover:to-sky-400 text-white font-bold text-xs shadow-lg flex items-center justify-center gap-2 transition-transform active:scale-95">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    <span id="directDownloadLinkText">Save 4K File to Device</span>
+                </a>
+
+                <button id="nativeShareFileBtn" type="button" class="w-full py-2 px-4 rounded-xl glass-pill text-xs font-semibold text-sky-200 border border-sky-400/40 flex items-center justify-center gap-1.5">
+                    <svg class="w-4 h-4 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+                    </svg>
+                    <span>Share / Save to Gallery</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /********************************************************************
+         * 1. PRESET DHIKR DATA, 15 ISLAMIC THEMES, 8 TASBIH DESIGNS & 9 SOUNDS
+         ********************************************************************/
+        const DHIKR_PRESETS = [
+            {
+                id: 'astaghfirullah',
+                arabic: 'أَسْتَغْفِرُ اللّٰهَ',
+                transliteration: 'Astaghfirullah',
+                translation: 'I seek forgiveness from Allah',
+                defaultTarget: 100,
+                recommendedTheme: 0,
+                recommendedBead: 0
+            },
+            {
+                id: 'subhanallah',
+                arabic: 'سُبْحَانَ اللّٰهِ',
+                transliteration: 'SubhanAllah',
+                translation: 'Glory be to Allah',
+                defaultTarget: 30,
+                recommendedTheme: 5,
+                recommendedBead: 2
+            },
+            {
+                id: 'alhamdulillah',
+                arabic: 'ٱلْحَمْدُ لِلّٰهِ',
+                transliteration: 'Alhamdulillah',
+                translation: 'All praise is due to Allah',
+                defaultTarget: 33,
+                recommendedTheme: 2,
+                recommendedBead: 2
+            },
+            {
+                id: 'allahuakbar',
+                arabic: 'اللّٰهُ أَكْبَرُ',
+                transliteration: 'Allahu Akbar',
+                translation: 'Allah is the Greatest',
+                defaultTarget: 33,
+                recommendedTheme: 1,
+                recommendedBead: 1
+            },
+            {
+                id: 'lailahaillallah',
+                arabic: 'لَا إِلٰهَ إِلَّا اللّٰهُ',
+                transliteration: 'La ilaha illallah',
+                translation: 'There is no deity worthy of worship except Allah',
+                defaultTarget: 100,
+                recommendedTheme: 1,
+                recommendedBead: 1
+            },
+            {
+                id: 'salawat',
+                arabic: 'اللّٰهُمَّ صَلِّ عَلَىٰ مُحَمَّدٍ',
+                transliteration: 'Allahumma salli ala Muhammad',
+                translation: 'O Allah, send peace and blessings upon Muhammad',
+                defaultTarget: 100,
+                recommendedTheme: 2,
+                recommendedBead: 2
+            },
+            {
+                id: 'subhanallah_wabihamdihi',
+                arabic: 'سُبْحَانَ اللّٰهِ وَبِحَمْدِهِ',
+                transliteration: 'SubhanAllahi wa bihamdihi',
+                translation: 'Glory be to Allah and praise Him',
+                defaultTarget: 100,
+                recommendedTheme: 3,
+                recommendedBead: 3
+            },
+            {
+                id: 'hawqala',
+                arabic: 'لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللّٰهِ',
+                transliteration: 'La hawla wa la quwwata illa billah',
+                translation: 'There is no power nor strength except through Allah',
+                defaultTarget: 33,
+                recommendedTheme: 4,
+                recommendedBead: 5
+            },
+            {
+                id: 'yunus_dua',
+                arabic: 'لَا إِلٰهَ إِلَّا أَنْتَ سُبْحَانَكَ',
+                transliteration: 'La ilaha illa Anta Subhanaka',
+                translation: 'There is no deity except You; exalted are You',
+                defaultTarget: 33,
+                recommendedTheme: 6,
+                recommendedBead: 7
+            },
+            {
+                id: 'hasbunallah',
+                arabic: 'حَسْبُنَا اللّٰهُ وَنِعْمَ الْوَكِيلُ',
+                transliteration: 'HasbunAllahu wa ni’mal Wakeel',
+                translation: 'Sufficient for us is Allah, and He is the best Disposer of affairs',
+                defaultTarget: 33,
+                recommendedTheme: 7,
+                recommendedBead: 6
+            }
+        ];
+
+        const THEMES = [
+            {
+                name: 'Rainy Night (@zyva)',
+                icon: '🌧️',
+                ringGrad: 'url(#ringGradRain)',
+                ringColors: ['#bae6fd', '#38bdf8', '#6366f1'],
+                diamondClass: 'bg-sky-300 shadow-[0_0_10px_#7dd3fc]',
+                accentColor: '#38bdf8'
+            },
+            {
+                name: 'Makkah Holy Kaaba Noor',
+                icon: '🕋',
+                ringGrad: 'url(#ringGradMadinah)',
+                ringColors: ['#fef08a', '#f59e0b', '#d97706'],
+                diamondClass: 'bg-amber-300 shadow-[0_0_12px_#fde047]',
+                accentColor: '#f59e0b'
+            },
+            {
+                name: 'Madinah Nabawi Green Dome',
+                icon: '🕌',
+                ringGrad: 'url(#ringGradEmerald)',
+                ringColors: ['#a7f3d0', '#10b981', '#eab308'],
+                diamondClass: 'bg-emerald-300 shadow-[0_0_12px_#6ee7b7]',
+                accentColor: '#10b981'
+            },
+            {
+                name: 'Al-Aqsa Golden Dome',
+                icon: '✨',
+                ringGrad: 'url(#ringGradMadinah)',
+                ringColors: ['#fef08a', '#38bdf8', '#eab308'],
+                diamondClass: 'bg-yellow-300 shadow-[0_0_12px_#fde047]',
+                accentColor: '#eab308'
+            },
+            {
+                name: 'Ramadan Hanging Fanoos',
+                icon: '🏮',
+                ringGrad: 'url(#ringGradSunset)',
+                ringColors: ['#fde68a', '#fb923c', '#c084fc'],
+                diamondClass: 'bg-amber-400 shadow-[0_0_12px_#fbbf24]',
+                accentColor: '#fb923c'
+            },
+            {
+                name: 'Sunset Meadow (khayrx)',
+                icon: '🌅',
+                ringGrad: 'url(#ringGradSunset)',
+                ringColors: ['#fde68a', '#fb923c', '#f43f5e'],
+                diamondClass: 'bg-orange-400 shadow-[0_0_10px_#fb923c]',
+                accentColor: '#fb923c'
+            },
+            {
+                name: 'Arabian Desert Laylatul Qadr',
+                icon: '🏜️',
+                ringGrad: 'url(#ringGradAurora)',
+                ringColors: ['#fde68a', '#38bdf8', '#818cf8'],
+                diamondClass: 'bg-indigo-300 shadow-[0_0_12px_#818cf8]',
+                accentColor: '#818cf8'
+            },
+            {
+                name: 'Alhambra Islamic Star',
+                icon: '🏛️',
+                ringGrad: 'url(#ringGradEmerald)',
+                ringColors: ['#6ee7b7', '#14b8a6', '#facc15'],
+                diamondClass: 'bg-teal-300 shadow-[0_0_12px_#5eead4]',
+                accentColor: '#14b8a6'
+            },
+            {
+                name: 'Starlight Fajr Sky',
+                icon: '🌙',
+                ringGrad: 'url(#ringGradEmerald)',
+                ringColors: ['#a7f3d0', '#34d399', '#0ea5e9'],
+                diamondClass: 'bg-emerald-300 shadow-[0_0_10px_#6ee7b7]',
+                accentColor: '#34d399'
+            },
+            {
+                name: 'Jannah Blossom Dawn',
+                icon: '🌸',
+                ringGrad: 'url(#ringGradSakura)',
+                ringColors: ['#fecdd3', '#f472b6', '#a855f7'],
+                diamondClass: 'bg-pink-300 shadow-[0_0_12px_#f9a8d4]',
+                accentColor: '#f472b6'
+            },
+            {
+                name: 'Istanbul Blue Mosque Sunset',
+                icon: '🌇',
+                ringGrad: 'url(#ringGradSunset)',
+                ringColors: ['#fde68a', '#f97316', '#ec4899'],
+                diamondClass: 'bg-amber-300 shadow-[0_0_12px_#fb923c]',
+                accentColor: '#f97316'
+            },
+            {
+                name: 'Cave of Hira Divine Noor',
+                icon: '⛰️',
+                ringGrad: 'url(#ringGradMadinah)',
+                ringColors: ['#fef08a', '#facc15', '#38bdf8'],
+                diamondClass: 'bg-yellow-200 shadow-[0_0_14px_#fef08a]',
+                accentColor: '#facc15'
+            },
+            {
+                name: 'Himalayan Tahajjud Aurora',
+                icon: '🏔️',
+                ringGrad: 'url(#ringGradAurora)',
+                ringColors: ['#6ee7b7', '#38bdf8', '#c084fc'],
+                diamondClass: 'bg-emerald-300 shadow-[0_0_12px_#34d399]',
+                accentColor: '#34d399'
+            },
+            {
+                name: 'Cordoba Courtyard Fountain',
+                icon: '⛲',
+                ringGrad: 'url(#ringGradEmerald)',
+                ringColors: ['#a7f3d0', '#14b8a6', '#38bdf8'],
+                diamondClass: 'bg-teal-300 shadow-[0_0_12px_#2dd4bf]',
+                accentColor: '#14b8a6'
+            },
+            {
+                name: 'Milky Way Crescent Galaxy',
+                icon: '🌌',
+                ringGrad: 'url(#ringGradAurora)',
+                ringColors: ['#e0e7ff', '#818cf8', '#f472b6'],
+                diamondClass: 'bg-purple-300 shadow-[0_0_12px_#c084fc]',
+                accentColor: '#c084fc'
+            }
+        ];
+
+        // 8 Complete Tasbih Bead Designs (Each with unique palette, shape, and ornament pattern)
+        const BEAD_PALETTES = [
+            {
+                name: 'Turquoise Pearl',
+                shape: 'sphere',
+                dotColor: '#22d3ee',
+                highlight: '#e0f7fa',
+                mid: '#38bdf8',
+                deep: '#0c4a6e',
+                glow: 'rgba(56, 189, 248, 0.6)',
+                imamHighlight: '#fef08a',
+                imamMid: '#eab308',
+                imamDeep: '#713f12',
+                tasselColor: '#dbeafe'
+            },
+            {
+                name: 'Kiswah Black & Gold',
+                shape: 'kiswah',
+                dotColor: '#facc15',
+                highlight: '#64748b',
+                mid: '#1e293b',
+                deep: '#020617',
+                glow: 'rgba(250, 204, 21, 0.7)',
+                imamHighlight: '#fef9c3',
+                imamMid: '#eab308',
+                imamDeep: '#713f12',
+                tasselColor: '#fde047'
+            },
+            {
+                name: 'Madinah Emerald Jade',
+                shape: 'filigree',
+                dotColor: '#10b981',
+                highlight: '#d1fae5',
+                mid: '#10b981',
+                deep: '#064e3b',
+                glow: 'rgba(16, 185, 129, 0.65)',
+                imamHighlight: '#fef08a',
+                imamMid: '#f59e0b',
+                imamDeep: '#78350f',
+                tasselColor: '#a7f3d0'
+            },
+            {
+                name: 'Diamond Crystal Gem',
+                shape: 'faceted',
+                dotColor: '#bae6fd',
+                highlight: '#ffffff',
+                mid: '#7dd3fc',
+                deep: '#0369a1',
+                glow: 'rgba(186, 230, 253, 0.75)',
+                imamHighlight: '#fef08a',
+                imamMid: '#eab308',
+                imamDeep: '#713f12',
+                tasselColor: '#e0f2fe'
+            },
+            {
+                name: 'Authentic Koka Wood',
+                shape: 'wood',
+                dotColor: '#d97706',
+                highlight: '#fdba74',
+                mid: '#9a3412',
+                deep: '#431407',
+                glow: 'rgba(245, 158, 11, 0.55)',
+                imamHighlight: '#fde68a',
+                imamMid: '#d97706',
+                imamDeep: '#451a03',
+                tasselColor: '#fed7aa'
+            },
+            {
+                name: 'Yemeni Aqeeq Ruby',
+                shape: 'ringed',
+                dotColor: '#f43f5e',
+                highlight: '#fecdd3',
+                mid: '#e11d48',
+                deep: '#4c0519',
+                glow: 'rgba(244, 63, 94, 0.65)',
+                imamHighlight: '#fef08a',
+                imamMid: '#eab308',
+                imamDeep: '#713f12',
+                tasselColor: '#ffe4e6'
+            },
+            {
+                name: 'Makkah White Sadaf',
+                shape: 'halo',
+                dotColor: '#f8fafc',
+                highlight: '#ffffff',
+                mid: '#e2e8f0',
+                deep: '#475569',
+                glow: 'rgba(248, 250, 252, 0.75)',
+                imamHighlight: '#fef08a',
+                imamMid: '#f59e0b',
+                imamDeep: '#78350f',
+                tasselColor: '#f8fafc'
+            },
+            {
+                name: 'Royal Lapis Star',
+                shape: 'star',
+                dotColor: '#818cf8',
+                highlight: '#e0e7ff',
+                mid: '#4f46e5',
+                deep: '#1e1b4b',
+                glow: 'rgba(129, 140, 248, 0.7)',
+                imamHighlight: '#fef08a',
+                imamMid: '#eab308',
+                imamDeep: '#713f12',
+                tasselColor: '#e0e7ff'
+            }
+        ];
+
+        const SOUND_PROFILES = [
+            {
+                id: 'vocal_rain_zyva',
+                name: 'Vocal Hum + Rain + Count Tick (@zyva)',
+                short: 'Vocal+Tick',
+                emoji: '🎵',
+                rainLevel: 0.16,
+                padWave: 'vocal',
+                scale: 'minor',
+                clickType: 'pearl',
+                countdownTick: true,
+                voiceCount: false
+            },
+            {
+                id: 'countdown_pro_tick',
+                name: 'Crisp Counter & Countdown Chime + Pad',
+                short: 'Count Tick',
+                emoji: '⏱️',
+                rainLevel: 0.08,
+                padWave: 'sine',
+                scale: 'minor',
+                clickType: 'counter_tick',
+                countdownTick: true,
+                voiceCount: false
+            },
+            {
+                id: 'voice_countdown_dhikr',
+                name: 'Spoken Countdown + Tasbih Click + Rain',
+                short: 'Voice Count',
+                emoji: '🗣️',
+                rainLevel: 0.10,
+                padWave: 'vocal',
+                scale: 'hijaz',
+                clickType: 'crystal',
+                countdownTick: true,
+                voiceCount: true
+            },
+            {
+                id: 'makkah_haram',
+                name: 'Makkah Haram Echo & Countdown Bell',
+                short: 'Haram Echo',
+                emoji: '🕋',
+                rainLevel: 0.03,
+                padWave: 'vocal',
+                scale: 'hijaz',
+                clickType: 'crystal',
+                countdownTick: true,
+                voiceCount: false
+            },
+            {
+                id: 'madinah_oud',
+                name: 'Madinah Dawn Oud & Chimes',
+                short: 'Madinah Oud',
+                emoji: '🕌',
+                rainLevel: 0.05,
+                padWave: 'triangle',
+                scale: 'hijaz',
+                clickType: 'oud',
+                countdownTick: true,
+                voiceCount: false
+            },
+            {
+                id: 'rain_pad',
+                name: 'Heavy Night Rain & Deep Pad',
+                short: 'Night Rain',
+                emoji: '🌧️',
+                rainLevel: 0.25,
+                padWave: 'sine',
+                scale: 'minor',
+                clickType: 'water',
+                countdownTick: true,
+                voiceCount: false
+            },
+            {
+                id: 'ocean_tahajjud',
+                name: 'Ocean Waves & Pearl Tasbih',
+                short: 'Ocean',
+                emoji: '🌊',
+                rainLevel: 0.22,
+                padWave: 'sine',
+                scale: 'minor',
+                clickType: 'pearl',
+                countdownTick: true,
+                voiceCount: false
+            },
+            {
+                id: 'nature_wood',
+                name: 'Fajr Breeze & Koka Wood Beads',
+                short: 'Fajr Wood',
+                emoji: '🌿',
+                rainLevel: 0.08,
+                padWave: 'triangle',
+                scale: 'minor',
+                clickType: 'wood',
+                countdownTick: true,
+                voiceCount: false
+            },
+            {
+                id: 'clicks_only',
+                name: 'Pure Counter & Tasbih Ticks Only',
+                short: 'Ticks Only',
+                emoji: '📿',
+                rainLevel: 0.0,
+                padWave: 'none',
+                scale: 'minor',
+                clickType: 'counter_tick',
+                countdownTick: true,
+                voiceCount: false
+            }
+        ];
+
+        /********************************************************************
+         * 2. APPLICATION STATE
+         ********************************************************************/
+        const state = {
+            currentDhikr: DHIKR_PRESETS[0],
+            count: 0,
+            target: 100,
+            visualCount: 0,
+            themeIndex: 0,
+            beadPaletteIndex: 0,
+            soundProfileIndex: 0,
+            soundEnabled: true,
+            autoPlaying: false,
+            autoSpeedMs: 1200,
+            zenMode: false,
+            centerPulse: 0,
+            floatingPlusOnes: [],
+            ripples: [],
+            touchStartX: null,
+            touchStartY: null,
+            recordedVideoBlob: null,
+            recordedVideoUrl: null,
+            recordedVideoExt: 'webm',
+            isGeneratingFallbackVideo: false
+        };
+
+        /********************************************************************
+         * 3. MULTI-PROFILE WEB AUDIO SYNTHESIZER & RECORDER SUPPORT
+         ********************************************************************/
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.destNode = null;
+                this.isPlayingAmbient = false;
+                this.rainGain = null;
+                this.rainFilter = null;
+                this.chordInterval = null;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioCtx();
+                    if (this.ctx.createMediaStreamDestination) {
+                        this.destNode = this.ctx.createMediaStreamDestination();
+                    }
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            connectOutput(node) {
+                node.connect(this.ctx.destination);
+                if (this.destNode) {
+                    node.connect(this.destNode);
+                }
+            }
+
+            playBeadClick(isSeparator = false, isComplete = false) {
+                if (!state.soundEnabled) return;
+                try {
+                    this.init();
+                    const now = this.ctx.currentTime;
+                    const profile = SOUND_PROFILES[state.soundProfileIndex];
+
+                    // 1. Primary Bead Tap Sound
+                    const osc = this.ctx.createOscillator();
+                    const clickGain = this.ctx.createGain();
+
+                    if (profile.clickType === 'water') {
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(isComplete ? 620 : 390, now);
+                        osc.frequency.exponentialRampToValueAtTime(820, now + 0.065);
+                        clickGain.gain.setValueAtTime(0.2, now);
+                        clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                    } else if (profile.clickType === 'oud') {
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(isComplete ? 349.23 : (isSeparator ? 293.66 : 220), now);
+                        osc.frequency.exponentialRampToValueAtTime(75, now + 0.09);
+                        clickGain.gain.setValueAtTime(0.24, now);
+                        clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.10);
+                    } else if (profile.clickType === 'wood') {
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(isComplete ? 420 : 270, now);
+                        osc.frequency.exponentialRampToValueAtTime(95, now + 0.038);
+                        clickGain.gain.setValueAtTime(0.25, now);
+                        clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
+                    } else if (profile.clickType === 'crystal') {
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(isComplete ? 987.77 : 740, now);
+                        osc.frequency.exponentialRampToValueAtTime(240, now + 0.055);
+                        clickGain.gain.setValueAtTime(0.16, now);
+                        clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.065);
+                    } else if (profile.clickType === 'counter_tick') {
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(isComplete ? 1046.5 : 880, now);
+                        osc.frequency.exponentialRampToValueAtTime(190, now + 0.032);
+                        clickGain.gain.setValueAtTime(0.28, now);
+                        clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+                    } else {
+                        osc.type = 'sine';
+                        const baseFreq = isComplete ? 528 : (isSeparator ? 440 : 330);
+                        osc.frequency.setValueAtTime(baseFreq, now);
+                        osc.frequency.exponentialRampToValueAtTime(90, now + 0.048);
+                        clickGain.gain.setValueAtTime(0.20, now);
+                        clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.055);
+                    }
+
+                    osc.connect(clickGain);
+                    this.connectOutput(clickGain);
+                    osc.start(now);
+                    osc.stop(now + 0.11);
+
+                    // 1B. Crisp Digital/Mechanical Counter Tick on Every Count + Final Countdown Rising Beep
+                    const remaining = Math.max(0, state.target - state.count);
+                    const tickOsc = this.ctx.createOscillator();
+                    const tickGain = this.ctx.createGain();
+                    tickOsc.type = 'sine';
+
+                    if (remaining > 0 && remaining <= 5) {
+                        // Final 5 Countdown Rising Pitches (5, 4, 3, 2, 1 Left!)
+                        const countdownFreqs = { 5: 587.33, 4: 659.25, 3: 783.99, 2: 880.0, 1: 1046.5 };
+                        const cdFreq = countdownFreqs[remaining] || 880;
+                        tickOsc.frequency.setValueAtTime(cdFreq, now);
+                        tickOsc.frequency.exponentialRampToValueAtTime(cdFreq * 1.12, now + 0.09);
+                        tickGain.gain.setValueAtTime(0.22, now);
+                        tickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+                        tickOsc.connect(tickGain);
+                        this.connectOutput(tickGain);
+                        tickOsc.start(now);
+                        tickOsc.stop(now + 0.15);
+                    } else {
+                        // Subtle high-precision counter click transient on every count
+                        tickOsc.frequency.setValueAtTime(isSeparator ? 1320 : 1100, now);
+                        tickOsc.frequency.exponentialRampToValueAtTime(320, now + 0.018);
+                        tickGain.gain.setValueAtTime(0.11, now);
+                        tickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.022);
+                        tickOsc.connect(tickGain);
+                        this.connectOutput(tickGain);
+                        tickOsc.start(now);
+                        tickOsc.stop(now + 0.025);
+                    }
+
+                    // 1C. Optional Spoken Voice Count / Countdown (when Voice Count profile is selected or during final 5 countdown)
+                    if (profile.voiceCount && 'speechSynthesis' in window) {
+                        try {
+                            window.speechSynthesis.cancel();
+                            const textToSpeak = isComplete
+                                ? 'Alhamdulillah, Goal Complete'
+                                : (remaining <= 5 ? `${remaining}` : `${state.count}`);
+                            const utter = new SpeechSynthesisUtterance(textToSpeak);
+                            utter.rate = 1.15;
+                            utter.pitch = 1.0;
+                            utter.volume = 0.65;
+                            window.speechSynthesis.speak(utter);
+                        } catch (e) {}
+                    }
+
+                    // 2. Spiritual Harmonic Overtones (Hijaz or Minor Scale)
+                    const bellOsc = this.ctx.createOscillator();
+                    const bellGain = this.ctx.createGain();
+                    bellOsc.type = 'sine';
+                    const minorNotes = [440, 493.88, 523.25, 587.33, 659.25, 783.99, 880];
+                    const hijazNotes = [440, 466.16, 554.37, 587.33, 659.25, 698.46, 880];
+                    const scaleNotes = profile.scale === 'hijaz' ? hijazNotes : minorNotes;
+                    const noteFreq = isComplete ? 880 : scaleNotes[state.count % scaleNotes.length];
+                    bellOsc.frequency.setValueAtTime(noteFreq, now);
+
+                    bellGain.gain.setValueAtTime(isComplete ? 0.16 : 0.045, now);
+                    bellGain.gain.exponentialRampToValueAtTime(0.0008, now + (isComplete ? 1.8 : 0.42));
+
+                    bellOsc.connect(bellGain);
+                    this.connectOutput(bellGain);
+                    bellOsc.start(now);
+                    bellOsc.stop(now + (isComplete ? 1.85 : 0.45));
+
+                    // 3. Goal Completion Spiritual Chord
+                    if (isComplete) {
+                        const finishChord = profile.scale === 'hijaz'
+                            ? [440, 554.37, 659.25, 880]
+                            : [440, 523.25, 659.25, 880];
+                        finishChord.forEach((freq, idx) => {
+                            const cOsc = this.ctx.createOscillator();
+                            const cGain = this.ctx.createGain();
+                            cOsc.type = 'sine';
+                            cOsc.frequency.setValueAtTime(freq, now + idx * 0.09);
+                            cGain.gain.setValueAtTime(0.001, now + idx * 0.09);
+                            cGain.gain.linearRampToValueAtTime(0.075, now + idx * 0.09 + 0.12);
+                            cGain.gain.exponentialRampToValueAtTime(0.0005, now + idx * 0.09 + 2.4);
+                            cOsc.connect(cGain);
+                            this.connectOutput(cGain);
+                            cOsc.start(now + idx * 0.09);
+                            cOsc.stop(now + idx * 0.09 + 2.5);
+                        });
+                    }
+                } catch (e) {}
+            }
+
+            startAmbient() {
+                if (!state.soundEnabled || this.isPlayingAmbient) return;
+                try {
+                    this.init();
+                    this.isPlayingAmbient = true;
+
+                    const bufferSize = this.ctx.sampleRate * 2;
+                    const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                    const output = noiseBuffer.getChannelData(0);
+                    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+                    for (let i = 0; i < bufferSize; i++) {
+                        const white = Math.random() * 2 - 1;
+                        b0 = 0.99886 * b0 + white * 0.0555179;
+                        b1 = 0.99332 * b1 + white * 0.0750759;
+                        b2 = 0.96900 * b2 + white * 0.1538520;
+                        b3 = 0.86650 * b3 + white * 0.3104856;
+                        b4 = 0.55000 * b4 + white * 0.5329522;
+                        b5 = -0.7616 * b5 - white * 0.0168980;
+                        output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.015;
+                        b6 = white * 0.115926;
+                    }
+
+                    this.rainSource = this.ctx.createBufferSource();
+                    this.rainSource.buffer = noiseBuffer;
+                    this.rainSource.loop = true;
+
+                    this.rainFilter = this.ctx.createBiquadFilter();
+                    this.rainFilter.type = 'lowpass';
+                    this.rainFilter.frequency.value = 780;
+
+                    const profile = SOUND_PROFILES[state.soundProfileIndex];
+                    this.rainGain = this.ctx.createGain();
+                    this.rainGain.gain.value = profile.rainLevel;
+
+                    this.rainSource.connect(this.rainFilter);
+                    this.rainFilter.connect(this.rainGain);
+                    this.connectOutput(this.rainGain);
+                    this.rainSource.start();
+
+                    const playPadChord = () => {
+                        if (!this.isPlayingAmbient || !state.soundEnabled) return;
+                        const activeProfile = SOUND_PROFILES[state.soundProfileIndex];
+                        if (activeProfile.padWave === 'none') return;
+
+                        const now = this.ctx.currentTime;
+                        const minorChords = [
+                            [220.0, 261.63, 329.63, 392.00], // Am7
+                            [174.61, 220.0, 261.63, 329.63], // Fmaj7
+                            [196.00, 246.94, 293.66, 392.00], // G6
+                            [146.83, 220.00, 261.63, 349.23]  // Dm7
+                        ];
+                        const hijazChords = [
+                            [220.0, 277.18, 329.63, 440.00], // A Hijaz Root
+                            [146.83, 220.0, 293.66, 349.23], // Dm spiritual
+                            [174.61, 220.0, 261.63, 329.63], // Fmaj7
+                            [220.0, 233.08, 277.18, 329.63]  // Hijaz Resolve
+                        ];
+                        const chordList = activeProfile.scale === 'hijaz' ? hijazChords : minorChords;
+                        const chord = chordList[Math.floor(Math.random() * chordList.length)];
+
+                        chord.forEach((freq) => {
+                            const osc = this.ctx.createOscillator();
+                            const gain = this.ctx.createGain();
+
+                            if (activeProfile.padWave === 'vocal') {
+                                osc.type = 'sawtooth';
+                                const vocalFilter = this.ctx.createBiquadFilter();
+                                vocalFilter.type = 'bandpass';
+                                vocalFilter.frequency.setValueAtTime(480, now);
+                                vocalFilter.Q.value = 3.2;
+
+                                gain.gain.setValueAtTime(0.0001, now);
+                                gain.gain.linearRampToValueAtTime(0.026, now + 1.8);
+                                gain.gain.exponentialRampToValueAtTime(0.0001, now + 5.6);
+
+                                osc.connect(vocalFilter);
+                                vocalFilter.connect(gain);
+                            } else {
+                                osc.type = activeProfile.padWave;
+                                gain.gain.setValueAtTime(0.0001, now);
+                                gain.gain.linearRampToValueAtTime(0.022, now + 2.0);
+                                gain.gain.exponentialRampToValueAtTime(0.0001, now + 5.8);
+                                osc.connect(gain);
+                            }
+
+                            osc.frequency.setValueAtTime(freq, now);
+                            this.connectOutput(gain);
+                            osc.start(now);
+                            osc.stop(now + 6.0);
+                        });
+                    };
+
+                    playPadChord();
+                    this.chordInterval = setInterval(playPadChord, 4800);
+                } catch (e) {}
+            }
+
+            updateThemeVolume() {
+                if (this.rainGain && this.ctx) {
+                    const profile = SOUND_PROFILES[state.soundProfileIndex];
+                    this.rainGain.gain.setTargetAtTime(profile.rainLevel, this.ctx.currentTime, 0.35);
+                }
+            }
+
+            stopAmbient() {
+                this.isPlayingAmbient = false;
+                if (this.chordInterval) clearInterval(this.chordInterval);
+                if (this.rainSource) {
+                    try { this.rainSource.stop(); } catch (e) {}
+                    this.rainSource = null;
+                }
+            }
+        }
+
+        const soundEngine = new SoundEngine();
+
+        /********************************************************************
+         * 4. CANVAS SCENE & 3D CURVED TASBIH RENDERER
+         ********************************************************************/
+        const canvas = document.getElementById('sceneCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+        let dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+        // Background particles for all 6 themes
+        let raindrops = [];
+        let waterRipples = [];
+        let butterflies = [];
+        let stars = [];
+        let clouds = [];
+        let meadowFlowers = [];
+        let lanterns = [];
+        let sakuraPetals = [];
+        let shootingStars = [];
+
+        function initSceneParticles() {
+            // 1. Raindrops for Theme 0 (@zyva Rainy Night)
+            raindrops = [];
+            for (let i = 0; i < 95; i++) {
+                raindrops.push({
+                    x: Math.random() * width * 1.3,
+                    y: Math.random() * height,
+                    len: 16 + Math.random() * 22,
+                    speed: 6.5 + Math.random() * 6,
+                    alpha: 0.12 + Math.random() * 0.28,
+                    thickness: 0.8 + Math.random() * 1.1
+                });
+            }
+
+            // 2. Water surface ripples
+            waterRipples = [];
+            for (let i = 0; i < 18; i++) {
+                waterRipples.push({
+                    x: Math.random() * width,
+                    y: height * 0.80 + Math.random() * (height * 0.19),
+                    rx: Math.random() * 35,
+                    maxRx: 25 + Math.random() * 45,
+                    speed: 0.35 + Math.random() * 0.45,
+                    alpha: 0.35
+                });
+            }
+
+            // 3. Clouds
+            clouds = [
+                { x: width * 0.22, y: height * 0.16, scale: 1.1, speed: 0.08 },
+                { x: width * 0.72, y: height * 0.20, scale: 0.95, speed: 0.06 },
+                { x: width * 0.48, y: height * 0.28, scale: 1.25, speed: 0.05 }
+            ];
+
+            // 4. Butterflies for Theme 1 (khayrxstudios Sunset Meadow)
+            butterflies = [];
+            const bfColors = [
+                { top: '#fb923c', bottom: '#fed7aa' },
+                { top: '#7dd3fc', bottom: '#e0f2fe' },
+                { top: '#f8fafc', bottom: '#cbd5e1' },
+                { top: '#fbbf24', bottom: '#fef08a' }
+            ];
+            for (let i = 0; i < 7; i++) {
+                const col = bfColors[i % bfColors.length];
+                butterflies.push({
+                    x: Math.random() * width,
+                    y: height * 0.22 + Math.random() * (height * 0.55),
+                    vx: (Math.random() - 0.5) * 0.9,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    size: 7 + Math.random() * 6,
+                    wingPhase: Math.random() * Math.PI * 2,
+                    wingSpeed: 0.15 + Math.random() * 0.08,
+                    colorTop: col.top,
+                    colorBottom: col.bottom
+                });
+            }
+
+            // 5. Wildflowers along the bottom shore
+            meadowFlowers = [];
+            const numFlowers = Math.floor(width / 16);
+            for (let i = 0; i < numFlowers; i++) {
+                meadowFlowers.push({
+                    x: (i / numFlowers) * width + (Math.random() - 0.5) * 14,
+                    stemH: 18 + Math.random() * 34,
+                    hasFlower: Math.random() > 0.42,
+                    color: Math.random() > 0.45 ? '#fff7ed' : '#fb923c',
+                    phase: Math.random() * Math.PI * 2
+                });
+            }
+
+            // 6. Twinkling Stars for Theme 2, 3, 5
+            stars = [];
+            for (let i = 0; i < 95; i++) {
+                stars.push({
+                    x: Math.random() * width,
+                    y: Math.random() * (height * 0.74),
+                    r: 0.6 + Math.random() * 1.7,
+                    phase: Math.random() * Math.PI * 2,
+                    speed: 0.02 + Math.random() * 0.04
+                });
+            }
+
+            // 7. Floating Golden Lanterns for Theme 3 (Madinah Golden Night)
+            lanterns = [];
+            for (let i = 0; i < 14; i++) {
+                lanterns.push({
+                    x: Math.random() * width,
+                    y: Math.random() * (height * 0.78),
+                    size: 6 + Math.random() * 7,
+                    vy: -0.22 - Math.random() * 0.35,
+                    swayPhase: Math.random() * Math.PI * 2
+                });
+            }
+
+            // 8. Sakura Blossom Petals for Theme 4 (Sakura Blossom Dawn)
+            sakuraPetals = [];
+            for (let i = 0; i < 42; i++) {
+                sakuraPetals.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    size: 4 + Math.random() * 5,
+                    vx: -0.6 - Math.random() * 0.8,
+                    vy: 0.7 + Math.random() * 0.9,
+                    rot: Math.random() * Math.PI * 2,
+                    rotSpeed: (Math.random() - 0.5) * 0.04
+                });
+            }
+
+            // 9. Shooting Stars for Theme 5 (Cosmic Aurora)
+            shootingStars = [
+                { x: width * 0.8, y: height * 0.15, vx: -6, vy: 2.5, len: 55, active: false, timer: 40 },
+                { x: width * 0.6, y: height * 0.10, vx: -7, vy: 3.0, len: 70, active: false, timer: 160 }
+            ];
+        }
+
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            dpr = Math.min(window.devicePixelRatio || 1, 2);
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            initSceneParticles();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        /********************************************************************
+         * 5. THEME BACKGROUND RENDERERS (6 COMPLETE DESIGNS)
+         ********************************************************************/
+        function drawSoftCloud(cx, cy, scale, color, targetCtx = ctx) {
+            targetCtx.save();
+            targetCtx.translate(cx, cy);
+            targetCtx.scale(scale, scale);
+            const grad = targetCtx.createRadialGradient(0, 0, 10, 0, 0, 140);
+            grad.addColorStop(0, color);
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+            targetCtx.fillStyle = grad;
+            targetCtx.beginPath();
+            targetCtx.ellipse(0, 0, 140, 55, 0, 0, Math.PI * 2);
+            targetCtx.fill();
+            targetCtx.restore();
+        }
+
+        // THEME 0: Rainy Moonlight Night (@zyva video exact aesthetic)
+        function drawRainyNightScene(time) {
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, height * 0.78);
+            skyGrad.addColorStop(0, '#040d14');
+            skyGrad.addColorStop(0.35, '#0b2232');
+            skyGrad.addColorStop(0.75, '#13354b');
+            skyGrad.addColorStop(1, '#0c2536');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, width, height);
+
+            const stageHalf = Math.min(width * 0.45, 220);
+            const moonX = width / 2 + stageHalf * 0.56;
+            const moonY = height * 0.165;
+            const moonR = Math.min(width, height) * 0.048 + 10;
+
+            const moonGlow = ctx.createRadialGradient(moonX, moonY, moonR * 0.5, moonX, moonY, moonR * 4.2);
+            moonGlow.addColorStop(0, 'rgba(224, 242, 254, 0.35)');
+            moonGlow.addColorStop(0.35, 'rgba(125, 211, 252, 0.12)');
+            moonGlow.addColorStop(1, 'rgba(12, 37, 54, 0)');
+            ctx.fillStyle = moonGlow;
+            ctx.beginPath();
+            ctx.arc(moonX, moonY, moonR * 4.2, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#e2e8f0';
+            ctx.beginPath();
+            ctx.arc(moonX, moonY, moonR, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = 'rgba(148, 163, 184, 0.42)';
+            ctx.beginPath();
+            ctx.arc(moonX - moonR * 0.32, moonY - moonR * 0.18, moonR * 0.18, 0, Math.PI * 2);
+            ctx.arc(moonX + moonR * 0.25, moonY + moonR * 0.28, moonR * 0.14, 0, Math.PI * 2);
+            ctx.arc(moonX + moonR * 0.12, moonY - moonR * 0.36, moonR * 0.09, 0, Math.PI * 2);
+            ctx.fill();
+
+            clouds.forEach(c => {
+                c.x += c.speed;
+                if (c.x - 160 > width) c.x = -160;
+                drawSoftCloud(c.x, c.y, c.scale, 'rgba(56, 98, 128, 0.22)');
+            });
+
+            const horizonY = height * 0.77;
+            ctx.fillStyle = '#061520';
+            ctx.beginPath();
+            ctx.moveTo(0, horizonY);
+            ctx.quadraticCurveTo(width * 0.18, horizonY - 22, width * 0.38, horizonY - 4);
+            ctx.quadraticCurveTo(width * 0.68, horizonY + 8, width * 0.85, horizonY - 18);
+            ctx.quadraticCurveTo(width * 0.95, horizonY - 24, width, horizonY - 8);
+            ctx.lineTo(width, height);
+            ctx.lineTo(0, height);
+            ctx.closePath();
+            ctx.fill();
+
+            const lakeGrad = ctx.createLinearGradient(0, horizonY, 0, height);
+            lakeGrad.addColorStop(0, '#091e2c');
+            lakeGrad.addColorStop(0.4, '#0c2638');
+            lakeGrad.addColorStop(1, '#05121b');
+            ctx.fillStyle = lakeGrad;
+            ctx.fillRect(0, horizonY, width, height - horizonY);
+
+            ctx.strokeStyle = 'rgba(186, 230, 253, 0.24)';
+            ctx.lineWidth = 1.6;
+            for (let i = 0; i < 20; i++) {
+                const ry = horizonY + 8 + i * ((height - horizonY - 12) / 20);
+                const spread = (6 + i * 1.4) + Math.sin(time * 0.003 + i) * 4;
+                const offset = Math.sin(time * 0.002 + i * 0.7) * 3;
+                ctx.beginPath();
+                ctx.moveTo(moonX - spread + offset, ry);
+                ctx.lineTo(moonX + spread + offset, ry);
+                ctx.stroke();
+            }
+
+            waterRipples.forEach(r => {
+                r.rx += r.speed;
+                if (r.rx >= r.maxRx) {
+                    r.rx = 1;
+                    r.x = Math.random() * width;
+                    r.y = horizonY + 10 + Math.random() * (height - horizonY - 16);
+                }
+                const progress = r.rx / r.maxRx;
+                const alpha = (1 - progress) * 0.35;
+                ctx.strokeStyle = `rgba(148, 197, 233, ${alpha})`;
+                ctx.lineWidth = 1.1;
+                ctx.beginPath();
+                ctx.ellipse(r.x, r.y, r.rx, r.rx * 0.24, 0, 0, Math.PI * 2);
+                ctx.stroke();
+            });
+
+            raindrops.forEach(d => {
+                ctx.lineWidth = d.thickness;
+                ctx.strokeStyle = `rgba(203, 232, 255, ${d.alpha})`;
+                ctx.beginPath();
+                ctx.moveTo(d.x, d.y);
+                ctx.lineTo(d.x - d.len * 0.22, d.y + d.len);
+                ctx.stroke();
+
+                d.x -= d.speed * 0.22;
+                d.y += d.speed;
+                if (d.y > height) {
+                    d.y = -25;
+                    d.x = Math.random() * width * 1.25;
+                }
+            });
+        }
+
+        // THEME 1: Golden Sunset Lake & Butterflies (khayrxstudios aesthetic)
+        function drawSunsetMeadowScene(time) {
+            const horizonY = height * 0.76;
+
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
+            skyGrad.addColorStop(0, '#23313f');
+            skyGrad.addColorStop(0.32, '#3d4e5d');
+            skyGrad.addColorStop(0.62, '#9a6b56');
+            skyGrad.addColorStop(0.84, '#df7a47');
+            skyGrad.addColorStop(1, '#f59e0b');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, width, height);
+
+            const stageHalf = Math.min(width * 0.45, 220);
+            const sunX = width / 2 - stageHalf * 0.45;
+            const sunY = horizonY - 28;
+            const sunR = Math.min(width, height) * 0.068 + 12;
+
+            const sunGlow = ctx.createRadialGradient(sunX, sunY, sunR * 0.2, sunX, sunY, sunR * 3.5);
+            sunGlow.addColorStop(0, 'rgba(255, 251, 235, 0.95)');
+            sunGlow.addColorStop(0.25, 'rgba(253, 186, 116, 0.65)');
+            sunGlow.addColorStop(0.6, 'rgba(249, 115, 22, 0.25)');
+            sunGlow.addColorStop(1, 'rgba(249, 115, 22, 0)');
+            ctx.fillStyle = sunGlow;
+            ctx.beginPath();
+            ctx.arc(sunX, sunY, sunR * 3.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#070a0e';
+            ctx.beginPath();
+            ctx.moveTo(0, horizonY);
+            ctx.lineTo(0, horizonY - 75);
+            ctx.quadraticCurveTo(width * 0.08, horizonY - 85, width * 0.14, horizonY - 25);
+            ctx.quadraticCurveTo(width * 0.28, horizonY - 45, width * 0.44, horizonY - 12);
+            ctx.quadraticCurveTo(width * 0.62, horizonY - 48, width * 0.78, horizonY - 18);
+            ctx.quadraticCurveTo(width * 0.90, horizonY - 42, width, horizonY - 22);
+            ctx.lineTo(width, horizonY + 5);
+            ctx.closePath();
+            ctx.fill();
+
+            const waterGrad = ctx.createLinearGradient(0, horizonY, 0, height);
+            waterGrad.addColorStop(0, '#7c3f2c');
+            waterGrad.addColorStop(0.45, '#432829');
+            waterGrad.addColorStop(1, '#111622');
+            ctx.fillStyle = waterGrad;
+            ctx.fillRect(0, horizonY, width, height - horizonY);
+
+            ctx.strokeStyle = 'rgba(254, 215, 170, 0.45)';
+            ctx.lineWidth = 1.8;
+            for (let i = 0; i < 14; i++) {
+                const ry = horizonY + 6 + i * 7;
+                const w = 28 - i * 1.3 + Math.sin(time * 0.004 + i) * 5;
+                if (w > 2) {
+                    ctx.beginPath();
+                    ctx.moveTo(sunX - w, ry);
+                    ctx.lineTo(sunX + w, ry);
+                    ctx.stroke();
+                }
+            }
+
+            meadowFlowers.forEach((f) => {
+                const sway = Math.sin(time * 0.002 + f.phase) * 4;
+                ctx.strokeStyle = '#070a0f';
+                ctx.lineWidth = 1.6;
+                ctx.beginPath();
+                ctx.moveTo(f.x, height);
+                ctx.quadraticCurveTo(f.x + sway * 0.5, height - f.stemH * 0.5, f.x + sway, height - f.stemH);
+                ctx.stroke();
+
+                if (f.hasFlower) {
+                    const fx = f.x + sway;
+                    const fy = height - f.stemH;
+                    ctx.fillStyle = f.color;
+                    for (let p = 0; p < 5; p++) {
+                        const ang = (p * Math.PI * 2) / 5;
+                        ctx.beginPath();
+                        ctx.arc(fx + Math.cos(ang) * 3.2, fy + Math.sin(ang) * 3.2, 2.1, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.fillStyle = '#f59e0b';
+                    ctx.beginPath();
+                    ctx.arc(fx, fy, 1.8, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+
+            butterflies.forEach(b => {
+                b.x += b.vx;
+                b.y += b.vy + Math.sin(time * 0.003 + b.wingPhase) * 0.25;
+                b.wingPhase += b.wingSpeed;
+
+                if (b.x < -30) b.x = width + 30;
+                if (b.x > width + 30) b.x = -30;
+                if (b.y < height * 0.15) b.vy = Math.abs(b.vy);
+                if (b.y > height * 0.75) b.vy = -Math.abs(b.vy);
+
+                const flap = Math.abs(Math.sin(b.wingPhase));
+                ctx.save();
+                ctx.translate(b.x, b.y);
+                ctx.rotate(b.vx * 0.35);
+                ctx.shadowColor = b.colorTop;
+                ctx.shadowBlur = 10;
+
+                ctx.fillStyle = b.colorTop;
+                ctx.beginPath();
+                ctx.ellipse(-b.size * 0.6 * flap, -b.size * 0.25, b.size * 0.75 * flap, b.size * 0.5, -0.4, 0, Math.PI * 2);
+                ctx.ellipse(b.size * 0.6 * flap, -b.size * 0.25, b.size * 0.75 * flap, b.size * 0.5, 0.4, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = b.colorBottom;
+                ctx.beginPath();
+                ctx.ellipse(-b.size * 0.45 * flap, b.size * 0.3, b.size * 0.5 * flap, b.size * 0.38, -0.2, 0, Math.PI * 2);
+                ctx.ellipse(b.size * 0.45 * flap, b.size * 0.3, b.size * 0.5 * flap, b.size * 0.38, 0.2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+        }
+
+        // THEME 2: Starry Emerald Night (Fajr / Tahajjud serenity)
+        function drawStarlightFajrScene(time) {
+            const horizonY = height * 0.80;
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
+            skyGrad.addColorStop(0, '#020617');
+            skyGrad.addColorStop(0.45, '#062430');
+            skyGrad.addColorStop(0.85, '#064e3b');
+            skyGrad.addColorStop(1, '#0f766e');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, width, height);
+
+            stars.forEach(s => {
+                const twinkle = 0.25 + 0.75 * Math.abs(Math.sin(time * 0.002 + s.phase));
+                ctx.fillStyle = `rgba(240, 253, 250, ${twinkle})`;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            const stageHalf = Math.min(width * 0.45, 220);
+            const moonX = width / 2 + stageHalf * 0.55;
+            const moonY = height * 0.16;
+            const moonR = 24;
+
+            ctx.save();
+            ctx.shadowColor = '#a7f3d0';
+            ctx.shadowBlur = 22;
+            ctx.fillStyle = '#ecfdf5';
+            ctx.beginPath();
+            ctx.arc(moonX, moonY, moonR, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(moonX - 9, moonY - 6, moonR * 0.88, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            ctx.fillStyle = '#021318';
+            ctx.beginPath();
+            ctx.moveTo(0, horizonY);
+            ctx.quadraticCurveTo(width * 0.28, horizonY - 35, width * 0.55, horizonY - 10);
+            ctx.quadraticCurveTo(width * 0.82, horizonY + 12, width, horizonY - 24);
+            ctx.lineTo(width, height);
+            ctx.lineTo(0, height);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // THEME 1 (NEW ISLAMIC): Makkah — Holy Kaaba & Golden Noor
+        function drawMakkahKaabaScene(time) {
+            const horizonY = height * 0.81;
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
+            skyGrad.addColorStop(0, '#02040a');
+            skyGrad.addColorStop(0.45, '#091124');
+            skyGrad.addColorStop(0.82, '#1c1810');
+            skyGrad.addColorStop(1, '#3b2b10');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, width, height);
+
+            const cx = width / 2;
+
+            // Radiant Golden Noor Beams rising from the Kaaba
+            for (let i = -2; i <= 2; i++) {
+                ctx.save();
+                const sway = Math.sin(time * 0.0015 + i) * 18;
+                const beamGrad = ctx.createLinearGradient(cx, horizonY - 40, cx + i * 75 + sway, height * 0.08);
+                beamGrad.addColorStop(0, 'rgba(250, 204, 21, 0.22)');
+                beamGrad.addColorStop(0.5, 'rgba(250, 204, 21, 0.06)');
+                beamGrad.addColorStop(1, 'rgba(250, 204, 21, 0)');
+                ctx.fillStyle = beamGrad;
+                ctx.beginPath();
+                ctx.moveTo(cx - 28, horizonY);
+                ctx.lineTo(cx + i * 95 - 45 + sway, height * 0.05);
+                ctx.lineTo(cx + i * 95 + 45 + sway, height * 0.05);
+                ctx.lineTo(cx + 28, horizonY);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // Twinkling Golden Stars
+            stars.forEach(s => {
+                const twinkle = 0.25 + 0.75 * Math.abs(Math.sin(time * 0.002 + s.phase));
+                ctx.fillStyle = `rgba(254, 240, 138, ${twinkle})`;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Floating Noor Particles
+            lanterns.forEach(l => {
+                l.y += l.vy * 0.85;
+                const sx = l.x + Math.sin(time * 0.002 + l.swayPhase) * 10;
+                if (l.y < -20) {
+                    l.y = horizonY - 10;
+                    l.x = Math.random() * width;
+                }
+                const g = ctx.createRadialGradient(sx, l.y, 0.5, sx, l.y, l.size * 2.2);
+                g.addColorStop(0, 'rgba(254, 249, 195, 0.95)');
+                g.addColorStop(0.45, 'rgba(234, 179, 8, 0.4)');
+                g.addColorStop(1, 'rgba(234, 179, 8, 0)');
+                ctx.fillStyle = g;
+                ctx.beginPath();
+                ctx.arc(sx, l.y, l.size * 2.2, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Holy Kaaba Silhouette & Golden Kiswah Band at Horizon
+            const kw = 86;
+            const kh = 76;
+            const kx = cx - kw / 2;
+            const ky = horizonY - kh;
+
+            // Golden aura behind Kaaba
+            const kaabaGlow = ctx.createRadialGradient(cx, horizonY - kh * 0.4, 10, cx, horizonY - kh * 0.4, 135);
+            kaabaGlow.addColorStop(0, 'rgba(250, 204, 21, 0.42)');
+            kaabaGlow.addColorStop(1, 'rgba(250, 204, 21, 0)');
+            ctx.fillStyle = kaabaGlow;
+            ctx.beginPath();
+            ctx.arc(cx, horizonY - kh * 0.4, 135, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Kaaba Cube Body
+            ctx.fillStyle = '#090b10';
+            ctx.strokeStyle = 'rgba(250, 204, 21, 0.35)';
+            ctx.lineWidth = 1.2;
+            ctx.fillRect(kx, ky, kw, kh);
+            ctx.strokeRect(kx, ky, kw, kh);
+
+            // Golden Kiswah Hizam Band
+            const bandGrad = ctx.createLinearGradient(kx, ky + 16, kx + kw, ky + 16);
+            bandGrad.addColorStop(0, '#b45309');
+            bandGrad.addColorStop(0.5, '#fde047');
+            bandGrad.addColorStop(1, '#b45309');
+            ctx.fillStyle = bandGrad;
+            ctx.fillRect(kx + 2, ky + 15, kw - 4, 9);
+
+            // Golden Door (Multazam / Bab al-Kaaba) & Qandil ornaments
+            ctx.fillRect(cx + 8, ky + 32, 14, 26);
+            ctx.beginPath();
+            ctx.arc(cx - 18, ky + 36, 4.5, 0, Math.PI * 2);
+            ctx.arc(cx - 4, ky + 36, 4.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Marble Mataf Floor Reflection
+            const floorGrad = ctx.createLinearGradient(0, horizonY, 0, height);
+            floorGrad.addColorStop(0, '#14110b');
+            floorGrad.addColorStop(1, '#04060c');
+            ctx.fillStyle = floorGrad;
+            ctx.fillRect(0, horizonY, width, height - horizonY);
+        }
+
+        // THEME 3 (NEW ISLAMIC): Al-Aqsa — Golden Dome of the Rock
+        function drawAlAqsaDomeScene(time) {
+            const horizonY = height * 0.80;
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
+            skyGrad.addColorStop(0, '#040817');
+            skyGrad.addColorStop(0.45, '#0f1e3d');
+            skyGrad.addColorStop(0.8, '#1e3a5f');
+            skyGrad.addColorStop(1, '#3b3322');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, width, height);
+
+            stars.forEach(s => {
+                const twinkle = 0.25 + 0.75 * Math.abs(Math.sin(time * 0.0022 + s.phase));
+                ctx.fillStyle = `rgba(224, 242, 254, ${twinkle})`;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            const cx = width / 2;
+            // Golden Dome of the Rock at Horizon
+            const domeGrad = ctx.createLinearGradient(cx - 48, horizonY - 65, cx + 48, horizonY);
+            domeGrad.addColorStop(0, '#fef08a');
+            domeGrad.addColorStop(0.5, '#eab308');
+            domeGrad.addColorStop(1, '#854d0e');
+
+            ctx.save();
+            ctx.shadowColor = '#facc15';
+            ctx.shadowBlur = 22;
+            ctx.fillStyle = domeGrad;
+            ctx.beginPath();
+            ctx.arc(cx, horizonY - 22, 42, Math.PI, 0);
+            ctx.fill();
+            ctx.restore();
+
+            // Octagonal Blue-Tile Drum & Walls
+            ctx.fillStyle = '#0c2d48';
+            ctx.fillRect(cx - 46, horizonY - 22, 92, 10);
+            ctx.fillStyle = '#071a2c';
+            ctx.fillRect(cx - 78, horizonY - 12, 156, 12);
+
+            // Golden Crescent Finial
+            ctx.strokeStyle = '#fde047';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(cx, horizonY - 64);
+            ctx.lineTo(cx, horizonY - 78);
+            ctx.stroke();
+
+            ctx.fillStyle = '#030812';
+            ctx.fillRect(0, horizonY, width, height - horizonY);
+        }
+
+        // THEME 4 (NEW ISLAMIC): Ramadan Kareem — Hanging Fanoos Lanterns & Arch
+        function drawRamadanFanoosScene(time) {
+            const horizonY = height * 0.80;
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
+            skyGrad.addColorStop(0, '#0f0722');
+            skyGrad.addColorStop(0.45, '#1e113a');
+            skyGrad.addColorStop(0.8, '#3b1d4a');
+            skyGrad.addColorStop(1, '#6b3428');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, width, height);
+
+            stars.forEach(s => {
+                const twinkle = 0.25 + 0.75 * Math.abs(Math.sin(time * 0.002 + s.phase));
+                ctx.fillStyle = `rgba(254, 240, 138, ${twinkle})`;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Hanging Ramadan Fanoos Lanterns from Top Corners
+            const stageHalf = Math.min(width * 0.44, 200);
+            const hangPositions = [
+                { x: width / 2 - stageHalf * 0.78, len: 68, phase: 0 },
+                { x: width / 2 + stageHalf * 0.78, len: 82, phase: 1.5 }
+            ];
+            hangPositions.forEach(hp => {
+                const swing = Math.sin(time * 0.0022 + hp.phase) * 0.06;
+                ctx.save();
+                ctx.translate(hp.x, 0);
+                ctx.rotate(swing);
+                ctx.strokeStyle = 'rgba(253, 224, 71, 0.55)';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(0, hp.len);
+                ctx.stroke();
+
+                // Lantern Glow
+                const lg = ctx.createRadialGradient(0, hp.len + 16, 2, 0, hp.len + 16, 42);
+                lg.addColorStop(0, 'rgba(254, 240, 138, 0.95)');
+                lg.addColorStop(0.4, 'rgba(245, 158, 11, 0.45)');
+                lg.addColorStop(1, 'rgba(245, 158, 11, 0)');
+                ctx.fillStyle = lg;
+                ctx.beginPath();
+                ctx.arc(0, hp.len + 16, 42, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Ornate Fanoos Shape
+                ctx.fillStyle = '#eab308';
+                ctx.beginPath();
+                ctx.moveTo(-7, hp.len);
+                ctx.lineTo(7, hp.len);
+                ctx.lineTo(11, hp.len + 12);
+                ctx.lineTo(7, hp.len + 28);
+                ctx.lineTo(-7, hp.len + 28);
+                ctx.lineTo(-11, hp.len + 12);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.fillStyle = '#fef9c3';
+                ctx.fillRect(-4, hp.len + 8, 8, 14);
+                ctx.restore();
+            });
+
+            ctx.fillStyle = '#090414';
+            ctx.fillRect(0, horizonY, width, height - horizonY);
+        }
+
+        // THEME 6 (NEW ISLAMIC): Arabian Desert Oasis & Laylatul Qadr
+        function drawDesertOasisScene(time) {
+            const horizonY = height * 0.78;
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
+            skyGrad.addColorStop(0, '#020617');
+            skyGrad.addColorStop(0.45, '#1e1b4b');
+            skyGrad.addColorStop(0.8, '#312e81');
+            skyGrad.addColorStop(1, '#78350f');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, width, height);
+
+            stars.forEach(s => {
+                const twinkle = 0.3 + 0.7 * Math.abs(Math.sin(time * 0.002 + s.phase));
+                ctx.fillStyle = `rgba(254, 249, 195, ${twinkle})`;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Rolling Desert Sand Dunes
+            ctx.fillStyle = '#1c1208';
+            ctx.beginPath();
+            ctx.moveTo(0, horizonY);
+            ctx.quadraticCurveTo(width * 0.3, horizonY - 38, width * 0.62, horizonY - 8);
+            ctx.quadraticCurveTo(width * 0.85, horizonY + 12, width, horizonY - 22);
+            ctx.lineTo(width, height);
+            ctx.lineTo(0, height);
+            ctx.fill();
+
+            // Date Palm Tree Silhouette on Left Dune
+            const px = width * 0.22;
+            const py = horizonY - 20;
+            ctx.strokeStyle = '#0c0703';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(px, py + 25);
+            ctx.quadraticCurveTo(px + 6, py - 25, px + 14, py - 62);
+            ctx.stroke();
+
+            ctx.lineWidth = 2.2;
+            [-1.2, -0.6, 0, 0.6, 1.2].forEach(ang => {
+                ctx.beginPath();
+                ctx.moveTo(px + 14, py - 62);
+                ctx.quadraticCurveTo(px + 14 + Math.cos(ang) * 20, py - 72, px + 14 + Math.cos(ang) * 34, py - 50 + Math.abs(ang) * 8);
+                ctx.stroke();
+            });
+        }
+
+        // THEME 7 (NEW ISLAMIC): Alhambra Geometric Rub el Hizb Star
+        function drawAlhambraStarScene(time) {
+            const horizonY = height * 0.79;
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
+            skyGrad.addColorStop(0, '#021a19');
+            skyGrad.addColorStop(0.5, '#063735');
+            skyGrad.addColorStop(1, '#0d544f');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, width, height);
+
+            // Rotating Sacred 8-Pointed Islamic Star (Rub el Hizb) Watermark in Sky
+            const cx = width / 2;
+            const cy = height * 0.23;
+            const sr = 68;
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(time * 0.00025);
+            ctx.strokeStyle = 'rgba(250, 204, 21, 0.16)';
+            ctx.lineWidth = 2;
+            for (let r = 0; r < 2; r++) {
+                ctx.save();
+                ctx.rotate((r * Math.PI) / 4);
+                ctx.strokeRect(-sr, -sr, sr * 2, sr * 2);
+                ctx.restore();
+            }
+            ctx.restore();
+
+            stars.forEach(s => {
+                const twinkle = 0.25 + 0.7 * Math.abs(Math.sin(time * 0.002 + s.phase));
+                ctx.fillStyle = `rgba(167, 243, 208, ${twinkle})`;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            ctx.fillStyle = '#021212';
+            ctx.fillRect(0, horizonY, width, height - horizonY);
+        }
+
+        // THEME 2: Madinah Golden Night & Floating Lanterns
+        function drawMadinahLanternScene(time) {
+            const horizonY = height * 0.81;
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
+            skyGrad.addColorStop(0, '#04100d');
+            skyGrad.addColorStop(0.42, '#07241c');
+            skyGrad.addColorStop(0.78, '#0f3d2e');
+            skyGrad.addColorStop(1, '#3b3015');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, width, height);
+
+            // Soft golden horizon glow behind the Mosque silhouette
+            const domeGlow = ctx.createRadialGradient(width / 2, horizonY, 10, width / 2, horizonY, width * 0.55);
+            domeGlow.addColorStop(0, 'rgba(250, 204, 21, 0.28)');
+            domeGlow.addColorStop(0.5, 'rgba(16, 185, 129, 0.12)');
+            domeGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = domeGlow;
+            ctx.fillRect(0, horizonY - 220, width, 260);
+
+            // Twinkling golden stars
+            stars.forEach(s => {
+                const twinkle = 0.2 + 0.75 * Math.abs(Math.sin(time * 0.002 + s.phase));
+                ctx.fillStyle = `rgba(254, 240, 138, ${twinkle})`;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Floating Warm Lanterns (Fanoos)
+            lanterns.forEach(l => {
+                l.y += l.vy;
+                const swayX = l.x + Math.sin(time * 0.002 + l.swayPhase) * 12;
+                if (l.y < -30) {
+                    l.y = horizonY - 10;
+                    l.x = Math.random() * width;
+                }
+
+                ctx.save();
+                ctx.translate(swayX, l.y);
+                const g = ctx.createRadialGradient(0, 0, 1, 0, 0, l.size * 2.6);
+                g.addColorStop(0, 'rgba(254, 240, 138, 0.95)');
+                g.addColorStop(0.4, 'rgba(245, 158, 11, 0.45)');
+                g.addColorStop(1, 'rgba(245, 158, 11, 0)');
+                ctx.fillStyle = g;
+                ctx.beginPath();
+                ctx.arc(0, 0, l.size * 2.6, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Lantern body
+                ctx.fillStyle = '#fef08a';
+                ctx.beginPath();
+                ctx.roundRect(-l.size * 0.45, -l.size * 0.7, l.size * 0.9, l.size * 1.4, 3);
+                ctx.fill();
+                ctx.restore();
+            });
+
+            // Mosque Dome & Minarets Silhouette at bottom
+            const cx = width / 2;
+            ctx.fillStyle = '#030d0a';
+            ctx.fillRect(0, horizonY, width, height - horizonY);
+
+            // Central Green Dome silhouette
+            ctx.beginPath();
+            ctx.arc(cx, horizonY, 56, Math.PI, 0);
+            ctx.fill();
+            // Spire on dome
+            ctx.strokeStyle = '#eab308';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(cx, horizonY - 56);
+            ctx.lineTo(cx, horizonY - 72);
+            ctx.stroke();
+
+            // Left & Right Minarets
+            const minOffset = Math.min(width * 0.34, 155);
+            [-minOffset, minOffset].forEach(dx => {
+                const mx = cx + dx;
+                ctx.fillStyle = '#030d0a';
+                ctx.fillRect(mx - 7, horizonY - 95, 14, 95);
+                ctx.beginPath();
+                ctx.moveTo(mx - 8, horizonY - 95);
+                ctx.lineTo(mx, horizonY - 122);
+                ctx.lineTo(mx + 8, horizonY - 95);
+                ctx.fill();
+            });
+        }
+
+        // THEME 4 (NEW): Sakura Blossom Dawn River
+        function drawSakuraDawnScene(time) {
+            const horizonY = height * 0.77;
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
+            skyGrad.addColorStop(0, '#1e1b4b');
+            skyGrad.addColorStop(0.38, '#4c1d95');
+            skyGrad.addColorStop(0.72, '#be185d');
+            skyGrad.addColorStop(1, '#fda4af');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, width, height);
+
+            // Soft Dawn Sun in center-right
+            const sunX = width * 0.65;
+            const sunY = horizonY - 35;
+            const sunGlow = ctx.createRadialGradient(sunX, sunY, 8, sunX, sunY, 130);
+            sunGlow.addColorStop(0, 'rgba(255, 241, 242, 0.9)');
+            sunGlow.addColorStop(0.4, 'rgba(251, 113, 133, 0.35)');
+            sunGlow.addColorStop(1, 'rgba(251, 113, 133, 0)');
+            ctx.fillStyle = sunGlow;
+            ctx.beginPath();
+            ctx.arc(sunX, sunY, 130, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Misty Layered Hills
+            ctx.fillStyle = '#2e1065';
+            ctx.beginPath();
+            ctx.moveTo(0, horizonY);
+            ctx.quadraticCurveTo(width * 0.25, horizonY - 45, width * 0.55, horizonY - 12);
+            ctx.quadraticCurveTo(width * 0.8, horizonY - 38, width, horizonY - 15);
+            ctx.lineTo(width, height);
+            ctx.lineTo(0, height);
+            ctx.fill();
+
+            // Dawn River Reflection
+            const riverGrad = ctx.createLinearGradient(0, horizonY, 0, height);
+            riverGrad.addColorStop(0, '#831843');
+            riverGrad.addColorStop(0.5, '#3b0764');
+            riverGrad.addColorStop(1, '#0f172a');
+            ctx.fillStyle = riverGrad;
+            ctx.fillRect(0, horizonY, width, height - horizonY);
+
+            // Drifting Sakura Petals
+            sakuraPetals.forEach(p => {
+                p.x += p.vx + Math.sin(time * 0.002 + p.y * 0.02) * 0.35;
+                p.y += p.vy;
+                p.rot += p.rotSpeed;
+
+                if (p.y > height + 15) {
+                    p.y = -15;
+                    p.x = Math.random() * width * 1.2;
+                }
+                if (p.x < -20) p.x = width + 15;
+
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.rot);
+                ctx.fillStyle = 'rgba(254, 205, 211, 0.82)';
+                ctx.shadowColor = '#f472b6';
+                ctx.shadowBlur = 6;
+                ctx.beginPath();
+                ctx.ellipse(0, 0, p.size, p.size * 0.55, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+        }
+
+        // THEME 5 (NEW): Cosmic Aurora & Shooting Stars
+        function drawCosmicAuroraScene(time) {
+            const horizonY = height * 0.80;
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
+            skyGrad.addColorStop(0, '#030712');
+            skyGrad.addColorStop(0.45, '#0f172a');
+            skyGrad.addColorStop(0.8, '#1e1b4b');
+            skyGrad.addColorStop(1, '#064e3b');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, width, height);
+
+            // Animated Aurora Borealis Waves
+            for (let band = 0; band < 2; band++) {
+                ctx.save();
+                ctx.beginPath();
+                const baseY = height * (0.24 + band * 0.12);
+                ctx.moveTo(0, baseY);
+                for (let x = 0; x <= width; x += 24) {
+                    const waveY = baseY + Math.sin(x * 0.008 + time * 0.0015 + band * 2) * 28;
+                    ctx.lineTo(x, waveY);
+                }
+                ctx.lineTo(width, baseY + 95);
+                ctx.lineTo(0, baseY + 95);
+                ctx.closePath();
+
+                const aurGrad = ctx.createLinearGradient(0, baseY - 30, 0, baseY + 95);
+                if (band === 0) {
+                    aurGrad.addColorStop(0, 'rgba(52, 211, 153, 0)');
+                    aurGrad.addColorStop(0.4, 'rgba(52, 211, 153, 0.22)');
+                    aurGrad.addColorStop(1, 'rgba(56, 189, 248, 0)');
+                } else {
+                    aurGrad.addColorStop(0, 'rgba(192, 132, 252, 0)');
+                    aurGrad.addColorStop(0.4, 'rgba(192, 132, 252, 0.18)');
+                    aurGrad.addColorStop(1, 'rgba(52, 211, 153, 0)');
+                }
+                ctx.fillStyle = aurGrad;
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // Stars
+            stars.forEach(s => {
+                const twinkle = 0.3 + 0.7 * Math.abs(Math.sin(time * 0.0025 + s.phase));
+                ctx.fillStyle = `rgba(224, 242, 254, ${twinkle})`;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Shooting Stars
+            shootingStars.forEach(st => {
+                st.timer--;
+                if (st.timer <= 0 && !st.active) {
+                    st.active = true;
+                    st.x = width * (0.4 + Math.random() * 0.55);
+                    st.y = height * (0.06 + Math.random() * 0.25);
+                }
+                if (st.active) {
+                    ctx.save();
+                    const tailGrad = ctx.createLinearGradient(st.x, st.y, st.x + st.len, st.y - st.len * 0.4);
+                    tailGrad.addColorStop(0, 'rgba(255,255,255,0.95)');
+                    tailGrad.addColorStop(1, 'rgba(56,189,248,0)');
+                    ctx.strokeStyle = tailGrad;
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(st.x, st.y);
+                    ctx.lineTo(st.x + st.len, st.y - st.len * 0.42);
+                    ctx.stroke();
+                    ctx.restore();
+
+                    st.x += st.vx;
+                    st.y += st.vy;
+                    if (st.x < -80 || st.y > horizonY) {
+                        st.active = false;
+                        st.timer = 90 + Math.random() * 140;
+                    }
+                }
+            });
+
+            // Mountain Lake Silhouette
+            ctx.fillStyle = '#030712';
+            ctx.beginPath();
+            ctx.moveTo(0, horizonY);
+            ctx.lineTo(width * 0.22, horizonY - 42);
+            ctx.lineTo(width * 0.48, horizonY - 8);
+            ctx.lineTo(width * 0.76, horizonY - 48);
+            ctx.lineTo(width, horizonY - 12);
+            ctx.lineTo(width, height);
+            ctx.lineTo(0, height);
+            ctx.fill();
+        }
+
+        // THEME 10 (NEW): Istanbul Blue Mosque Bosphorus Crimson Sunset
+        function drawIstanbulSunsetScene(time) {
+            const horizonY = height * 0.79;
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
+            skyGrad.addColorStop(0, '#1e1b4b');
+            skyGrad.addColorStop(0.35, '#4c1d95');
+            skyGrad.addColorStop(0.68, '#be123c');
+            skyGrad.addColorStop(1, '#fb923c');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, width, height);
+
+            // Setting Sun over Bosphorus
+            const sunX = width * 0.32;
+            const sunY = horizonY - 24;
+            const sunGlow = ctx.createRadialGradient(sunX, sunY, 6, sunX, sunY, 110);
+            sunGlow.addColorStop(0, 'rgba(254, 240, 138, 0.95)');
+            sunGlow.addColorStop(0.45, 'rgba(251, 146, 60, 0.45)');
+            sunGlow.addColorStop(1, 'rgba(251, 146, 60, 0)');
+            ctx.fillStyle = sunGlow;
+            ctx.beginPath();
+            ctx.arc(sunX, sunY, 110, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Cascading Ottoman Mosque Domes & Minarets Silhouette
+            const cx = width * 0.62;
+            ctx.fillStyle = '#0f071e';
+            ctx.beginPath();
+            ctx.arc(cx, horizonY, 52, Math.PI, 0);
+            ctx.arc(cx - 42, horizonY, 30, Math.PI, 0);
+            ctx.arc(cx + 42, horizonY, 30, Math.PI, 0);
+            ctx.fill();
+
+            [-85, -52, 52, 85].forEach(dx => {
+                const mx = cx + dx;
+                ctx.fillRect(mx - 4, horizonY - 92, 8, 92);
+                ctx.beginPath();
+                ctx.moveTo(mx - 5, horizonY - 92);
+                ctx.lineTo(mx, horizonY - 115);
+                ctx.lineTo(mx + 5, horizonY - 92);
+                ctx.fill();
+            });
+
+            // Bosphorus Sea & Shimmer
+            const seaGrad = ctx.createLinearGradient(0, horizonY, 0, height);
+            seaGrad.addColorStop(0, '#881337');
+            seaGrad.addColorStop(0.5, '#311042');
+            seaGrad.addColorStop(1, '#090514');
+            ctx.fillStyle = seaGrad;
+            ctx.fillRect(0, horizonY, width, height - horizonY);
+
+            ctx.strokeStyle = 'rgba(253, 186, 116, 0.4)';
+            ctx.lineWidth = 1.5;
+            for (let i = 0; i < 12; i++) {
+                const ry = horizonY + 8 + i * 8;
+                const w = 24 - i * 1.2 + Math.sin(time * 0.004 + i) * 4;
+                ctx.beginPath();
+                ctx.moveTo(sunX - w, ry);
+                ctx.lineTo(sunX + w, ry);
+                ctx.stroke();
+            }
+        }
+
+        // THEME 11 (NEW): Cave of Hira (Jabal al-Noor) Divine Light
+        function drawCaveOfHiraScene(time) {
+            const horizonY = height * 0.80;
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
+            skyGrad.addColorStop(0, '#020617');
+            skyGrad.addColorStop(0.5, '#0f172a');
+            skyGrad.addColorStop(1, '#1e293b');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, width, height);
+
+            stars.forEach(s => {
+                const twinkle = 0.25 + 0.75 * Math.abs(Math.sin(time * 0.002 + s.phase));
+                ctx.fillStyle = `rgba(254, 249, 195, ${twinkle})`;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Descending Divine Noor Beam from Top Center
+            const cx = width / 2;
+            const beamGrad = ctx.createLinearGradient(cx, 0, cx, horizonY);
+            beamGrad.addColorStop(0, 'rgba(254, 240, 138, 0.28)');
+            beamGrad.addColorStop(0.6, 'rgba(56, 189, 248, 0.10)');
+            beamGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = beamGrad;
+            ctx.beginPath();
+            ctx.moveTo(cx - 35, 0);
+            ctx.lineTo(cx + 35, 0);
+            ctx.lineTo(cx + 150, horizonY);
+            ctx.lineTo(cx - 150, horizonY);
+            ctx.closePath();
+            ctx.fill();
+
+            // Jabal al-Noor Mountain Peak Silhouette
+            ctx.fillStyle = '#070b14';
+            ctx.beginPath();
+            ctx.moveTo(0, height);
+            ctx.lineTo(0, horizonY - 10);
+            ctx.lineTo(cx - 90, horizonY - 75);
+            ctx.lineTo(cx, horizonY - 125);
+            ctx.lineTo(cx + 95, horizonY - 70);
+            ctx.lineTo(width, horizonY - 15);
+            ctx.lineTo(width, height);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // THEME 12 (NEW):Cordoba Courtyard & Tranquil Fountain
+        function drawCordobaCourtyardScene(time) {
+            const horizonY = height * 0.78;
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, horizonY);
+            skyGrad.addColorStop(0, '#042f2e');
+            skyGrad.addColorStop(0.5, '#0f766e');
+            skyGrad.addColorStop(1, '#115e59');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, width, height);
+
+            // Moorish Horseshoe Arch Frame at Top
+            ctx.save();
+            ctx.strokeStyle = 'rgba(253, 224, 71, 0.22)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(width / 2, height * 0.26, Math.min(width * 0.42, 185), Math.PI * 0.85, Math.PI * 0.15, false);
+            ctx.stroke();
+            ctx.restore();
+
+            // Courtyard Pool & Ripples
+            const poolGrad = ctx.createLinearGradient(0, horizonY, 0, height);
+            poolGrad.addColorStop(0, '#064e3b');
+            poolGrad.addColorStop(1, '#022c22');
+            ctx.fillStyle = poolGrad;
+            ctx.fillRect(0, horizonY, width, height - horizonY);
+
+            waterRipples.forEach(r => {
+                r.rx += r.speed;
+                if (r.rx >= r.maxRx) r.rx = 1;
+                const alpha = (1 - r.rx / r.maxRx) * 0.35;
+                ctx.strokeStyle = `rgba(167, 243, 208, ${alpha})`;
+                ctx.beginPath();
+                ctx.ellipse(r.x, r.y, r.rx, r.rx * 0.24, 0, 0, Math.PI * 2);
+                ctx.stroke();
+            });
+        }
+
+        // THEME 13 (NEW): Milky Way Crescent Galaxy
+        function drawMilkyWayGalaxyScene(time) {
+            const horizonY = height * 0.82;
+            const skyGrad = ctx.createLinearGradient(0, 0, width, horizonY);
+            skyGrad.addColorStop(0, '#030014');
+            skyGrad.addColorStop(0.45, '#1e1b4b');
+            skyGrad.addColorStop(0.75, '#3b0764');
+            skyGrad.addColorStop(1, '#0f172a');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, width, height);
+
+            // Nebula Glow Band
+            const nebGrad = ctx.createRadialGradient(width * 0.5, height * 0.35, 10, width * 0.5, height * 0.35, width * 0.65);
+            nebGrad.addColorStop(0, 'rgba(192, 132, 252, 0.22)');
+            nebGrad.addColorStop(0.5, 'rgba(56, 189, 248, 0.12)');
+            nebGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = nebGrad;
+            ctx.fillRect(0, 0, width, horizonY);
+
+            stars.forEach(s => {
+                const twinkle = 0.3 + 0.7 * Math.abs(Math.sin(time * 0.0028 + s.phase));
+                ctx.fillStyle = `rgba(243, 232, 255, ${twinkle})`;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r * 1.1, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            ctx.fillStyle = '#02010a';
+            ctx.fillRect(0, horizonY, width, height - horizonY);
+        }
+
+        /********************************************************************
+         * 6. 3D CURVED TASBIH BEADS & TASSEL RENDERER (WITH 8 BEAD DESIGNS)
+         ********************************************************************/
+        function getCurvePoint(slotOffset, beadSpacing, customW = width, customH = height) {
+            const centerX = customW / 2;
+            const centerY = customH * 0.565;
+            const dx = slotOffset * beadSpacing;
+            const curveFactor = 0.00175 / (beadSpacing / 42);
+            const dy = -curveFactor * dx * dx;
+            const slope = -2 * curveFactor * dx;
+            const angle = Math.atan(slope);
+            return {
+                x: centerX + dx,
+                y: centerY + dy,
+                angle
+            };
+        }
+
+        function drawBeadTassel(x, y, radius, palette, time, velocityShift, targetCtx = ctx) {
+            targetCtx.save();
+            const swingAngle = Math.sin(time * 0.004) * 0.04 + Math.min(Math.max(velocityShift * 0.28, -0.45), 0.45);
+            targetCtx.translate(x, y + radius * 0.72);
+            targetCtx.rotate(swingAngle);
+
+            targetCtx.fillStyle = palette.imamMid;
+            targetCtx.beginPath();
+            targetCtx.roundRect(-radius * 0.22, -radius * 0.1, radius * 0.44, radius * 0.3, 3);
+            targetCtx.fill();
+
+            const tasselGrad = targetCtx.createLinearGradient(0, 4, 0, radius * 2.45);
+            tasselGrad.addColorStop(0, '#ffffff');
+            tasselGrad.addColorStop(0.65, palette.tasselColor);
+            tasselGrad.addColorStop(1, 'rgba(148, 163, 184, 0.5)');
+
+            targetCtx.fillStyle = tasselGrad;
+            targetCtx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+            targetCtx.shadowBlur = 8;
+            targetCtx.beginPath();
+            targetCtx.moveTo(-radius * 0.2, radius * 0.14);
+            targetCtx.lineTo(radius * 0.2, radius * 0.14);
+            targetCtx.lineTo(radius * 0.48, radius * 2.35);
+            targetCtx.lineTo(0, radius * 2.05);
+            targetCtx.lineTo(-radius * 0.48, radius * 2.35);
+            targetCtx.closePath();
+            targetCtx.fill();
+
+            targetCtx.restore();
+        }
+
+        function draw3DBead(x, y, radius, angle, isGoldBead, isCenterActive, palette, targetCtx = ctx) {
+            targetCtx.save();
+            targetCtx.translate(x, y);
+
+            if (isCenterActive) {
+                targetCtx.shadowColor = isGoldBead ? 'rgba(250, 204, 21, 0.85)' : palette.glow;
+                targetCtx.shadowBlur = radius * 1.05;
+            } else {
+                targetCtx.shadowColor = 'rgba(0, 0, 0, 0.55)';
+                targetCtx.shadowBlur = radius * 0.45;
+                targetCtx.shadowOffsetY = radius * 0.22;
+            }
+
+            const grad = targetCtx.createRadialGradient(
+                -radius * 0.32, -radius * 0.35, radius * 0.08,
+                0, 0, radius
+            );
+
+            if (isGoldBead) {
+                grad.addColorStop(0, palette.imamHighlight);
+                grad.addColorStop(0.42, palette.imamMid);
+                grad.addColorStop(0.88, palette.imamDeep);
+                grad.addColorStop(1, '#271303');
+            } else {
+                grad.addColorStop(0, palette.highlight);
+                grad.addColorStop(0.35, palette.mid);
+                grad.addColorStop(0.85, palette.deep);
+                grad.addColorStop(1, '#041e2e');
+            }
+
+            targetCtx.fillStyle = grad;
+
+            const shape = palette.shape || 'sphere';
+
+            // Support 8 Distinct Tasbih Bead Designs!
+            if (shape === 'faceted' && !isGoldBead) {
+                // 10-sided Cut Crystal Diamond Gem
+                targetCtx.beginPath();
+                const sides = 10;
+                for (let i = 0; i < sides; i++) {
+                    const a = (i * Math.PI * 2) / sides + angle;
+                    const px = Math.cos(a) * radius;
+                    const py = Math.sin(a) * radius;
+                    if (i === 0) targetCtx.moveTo(px, py);
+                    else targetCtx.lineTo(px, py);
+                }
+                targetCtx.closePath();
+                targetCtx.fill();
+            } else {
+                targetCtx.beginPath();
+                targetCtx.arc(0, 0, radius, 0, Math.PI * 2);
+                targetCtx.fill();
+            }
+
+            targetCtx.shadowBlur = 0;
+            targetCtx.shadowOffsetY = 0;
+
+            // Extra geometric & Islamic ornamental details on beads
+            if (isGoldBead) {
+                targetCtx.rotate(angle);
+                targetCtx.strokeStyle = 'rgba(113, 63, 18, 0.55)';
+                targetCtx.lineWidth = Math.max(1.2, radius * 0.06);
+                [-0.38, 0, 0.38].forEach(offsetRatio => {
+                    const gy = offsetRatio * radius;
+                    const halfW = Math.sqrt(Math.max(0, radius * radius - gy * gy)) * 0.92;
+                    targetCtx.beginPath();
+                    targetCtx.moveTo(-halfW, gy);
+                    targetCtx.lineTo(halfW, gy);
+                    targetCtx.stroke();
+                });
+                targetCtx.rotate(-angle);
+            } else if (shape === 'kiswah') {
+                // Kiswah Black Onyx with ornate double 24K Gold Band
+                targetCtx.rotate(angle);
+                targetCtx.strokeStyle = 'rgba(250, 204, 21, 0.85)';
+                targetCtx.lineWidth = Math.max(1.8, radius * 0.11);
+                targetCtx.beginPath();
+                targetCtx.moveTo(-radius * 0.94, -radius * 0.14);
+                targetCtx.lineTo(radius * 0.94, -radius * 0.14);
+                targetCtx.stroke();
+
+                targetCtx.lineWidth = Math.max(1.0, radius * 0.045);
+                targetCtx.beginPath();
+                targetCtx.moveTo(-radius * 0.92, radius * 0.16);
+                targetCtx.lineTo(radius * 0.92, radius * 0.16);
+                targetCtx.stroke();
+                targetCtx.rotate(-angle);
+            } else if (shape === 'filigree') {
+                // Madinah Emerald with Golden Filigree Crescent Ring
+                targetCtx.strokeStyle = 'rgba(253, 224, 71, 0.55)';
+                targetCtx.lineWidth = Math.max(1.2, radius * 0.06);
+                targetCtx.beginPath();
+                targetCtx.arc(0, 0, radius * 0.66, 0, Math.PI * 2);
+                targetCtx.stroke();
+            } else if (shape === 'faceted') {
+                targetCtx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+                targetCtx.lineWidth = Math.max(1, radius * 0.045);
+                targetCtx.beginPath();
+                targetCtx.arc(0, 0, radius * 0.58, 0, Math.PI * 2);
+                targetCtx.stroke();
+            } else if (shape === 'wood') {
+                // Koka Wood grain rings
+                targetCtx.rotate(angle);
+                targetCtx.strokeStyle = 'rgba(67, 20, 7, 0.48)';
+                targetCtx.lineWidth = Math.max(1.1, radius * 0.05);
+                [-0.32, 0.32].forEach(rOff => {
+                    targetCtx.beginPath();
+                    targetCtx.moveTo(-radius * 0.86, rOff * radius);
+                    targetCtx.lineTo(radius * 0.86, rOff * radius);
+                    targetCtx.stroke();
+                });
+                targetCtx.rotate(-angle);
+            } else if (shape === 'ringed') {
+                targetCtx.rotate(angle);
+                targetCtx.strokeStyle = 'rgba(253, 224, 71, 0.72)';
+                targetCtx.lineWidth = Math.max(1.6, radius * 0.085);
+                targetCtx.beginPath();
+                targetCtx.moveTo(-radius * 0.95, 0);
+                targetCtx.lineTo(radius * 0.95, 0);
+                targetCtx.stroke();
+                targetCtx.rotate(-angle);
+            } else if (shape === 'halo') {
+                targetCtx.strokeStyle = 'rgba(255, 255, 255, 0.65)';
+                targetCtx.lineWidth = Math.max(1.3, radius * 0.06);
+                targetCtx.beginPath();
+                targetCtx.arc(0, 0, radius * 0.72, 0, Math.PI * 2);
+                targetCtx.stroke();
+            } else if (shape === 'star') {
+                // Rub el Hizb 8-pointed Golden Islamic Star inside bead
+                targetCtx.save();
+                targetCtx.rotate(angle);
+                targetCtx.strokeStyle = 'rgba(253, 224, 71, 0.65)';
+                targetCtx.lineWidth = Math.max(1.0, radius * 0.05);
+                const sr = radius * 0.42;
+                targetCtx.strokeRect(-sr, -sr, sr * 2, sr * 2);
+                targetCtx.rotate(Math.PI / 4);
+                targetCtx.strokeRect(-sr, -sr, sr * 2, sr * 2);
+                targetCtx.restore();
+            }
+
+            // Specular glossy highlight dot (top-left)
+            const specGrad = targetCtx.createRadialGradient(
+                -radius * 0.34, -radius * 0.36, 0,
+                -radius * 0.34, -radius * 0.36, radius * 0.42
+            );
+            specGrad.addColorStop(0, 'rgba(255, 255, 255, 0.92)');
+            specGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.25)');
+            specGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            targetCtx.fillStyle = specGrad;
+            targetCtx.beginPath();
+            targetCtx.arc(-radius * 0.34, -radius * 0.36, radius * 0.42, 0, Math.PI * 2);
+            targetCtx.fill();
+
+            // Rim light at bottom-right
+            targetCtx.strokeStyle = isGoldBead ? 'rgba(254, 240, 138, 0.35)' : 'rgba(186, 230, 253, 0.35)';
+            targetCtx.lineWidth = Math.max(1.1, radius * 0.055);
+            targetCtx.beginPath();
+            targetCtx.arc(0, 0, radius - 0.8, 0.2, Math.PI * 0.85);
+            targetCtx.stroke();
+
+            targetCtx.restore();
+        }
+
+        function drawTasbihAndEffects(time) {
+            const diff = state.count - state.visualCount;
+            state.visualCount += diff * 0.18;
+            if (Math.abs(diff) < 0.001) state.visualCount = state.count;
+
+            state.centerPulse *= 0.91;
+
+            const palette = BEAD_PALETTES[state.beadPaletteIndex];
+            const baseRadius = Math.min(Math.max(width * 0.043, 18.5), 23.5);
+            const beadSpacing = baseRadius * 2.08;
+
+            const centerPt = getCurvePoint(0, beadSpacing);
+
+            // 1. Curved Tasbih Cord
+            ctx.save();
+            ctx.beginPath();
+            for (let s = -12; s <= 12; s += 0.25) {
+                const pt = getCurvePoint(s, beadSpacing);
+                if (s === -12) ctx.moveTo(pt.x, pt.y);
+                else ctx.lineTo(pt.x, pt.y);
+            }
+            ctx.strokeStyle = 'rgba(226, 232, 240, 0.65)';
+            ctx.lineWidth = 2.6;
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+            ctx.shadowBlur = 6;
+            ctx.stroke();
+            ctx.restore();
+
+            // 2. Center Target Circle & Ripples
+            const targetRingRadius = baseRadius * 2.05;
+
+            for (let i = state.ripples.length - 1; i >= 0; i--) {
+                const rp = state.ripples[i];
+                rp.r += 1.4;
+                rp.alpha *= 0.94;
+                if (rp.alpha < 0.02) {
+                    state.ripples.splice(i, 1);
+                    continue;
+                }
+                ctx.save();
+                ctx.strokeStyle = `rgba(186, 230, 253, ${rp.alpha})`;
+                ctx.lineWidth = 1.8;
+                ctx.beginPath();
+                ctx.arc(centerPt.x, centerPt.y, rp.r, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            ctx.save();
+            const ringScale = 1 + state.centerPulse * 0.12;
+            const ringGlow = ctx.createRadialGradient(
+                centerPt.x, centerPt.y, baseRadius * 0.4,
+                centerPt.x, centerPt.y, targetRingRadius * 1.35
+            );
+            ringGlow.addColorStop(0, `rgba(125, 211, 252, ${0.18 + state.centerPulse * 0.25})`);
+            ringGlow.addColorStop(1, 'rgba(125, 211, 252, 0)');
+            ctx.fillStyle = ringGlow;
+            ctx.beginPath();
+            ctx.arc(centerPt.x, centerPt.y, targetRingRadius * 1.35, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.strokeStyle = `rgba(186, 230, 253, ${0.32 + state.centerPulse * 0.45})`;
+            ctx.lineWidth = 1.6;
+            ctx.beginPath();
+            ctx.arc(centerPt.x, centerPt.y, targetRingRadius * ringScale, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+
+            // 3. Visible Beads along the curve
+            const minVisibleSlot = -10;
+            const maxVisibleSlot = 10;
+            const startK = Math.max(0, Math.floor(state.visualCount + minVisibleSlot));
+            const endK = Math.min(state.target, Math.ceil(state.visualCount + maxVisibleSlot));
+
+            const beadsToRender = [];
+            for (let k = startK; k <= endK; k++) {
+                const slotOffset = k - state.visualCount;
+                beadsToRender.push({ k, slotOffset });
+            }
+            beadsToRender.sort((a, b) => Math.abs(b.slotOffset) - Math.abs(a.slotOffset));
+
+            beadsToRender.forEach(({ k, slotOffset }) => {
+                const pt = getCurvePoint(slotOffset, beadSpacing);
+                const distFromCenter = Math.abs(slotOffset);
+                const centerBoost = Math.max(0, 1 - distFromCenter) * (0.20 + state.centerPulse * 0.10);
+                const r = baseRadius * (1 + centerBoost);
+
+                const isTasselBead = (k === 0 || k === state.target);
+                const isSeparatorGold = isTasselBead || (k > 0 && k < state.target && k % 33 === 0);
+
+                if (isTasselBead) {
+                    drawBeadTassel(pt.x, pt.y, r, palette, time, diff, ctx);
+                }
+
+                draw3DBead(pt.x, pt.y, r, pt.angle, isSeparatorGold, distFromCenter < 0.45, palette, ctx);
+            });
+
+            // 4. Floating "+1" indicators
+            for (let i = state.floatingPlusOnes.length - 1; i >= 0; i--) {
+                const fp = state.floatingPlusOnes[i];
+                fp.y += fp.vy;
+                fp.alpha -= 0.022;
+                if (fp.alpha <= 0) {
+                    state.floatingPlusOnes.splice(i, 1);
+                    continue;
+                }
+                ctx.save();
+                ctx.font = '700 17px "Plus Jakarta Sans", sans-serif';
+                ctx.fillStyle = `rgba(224, 242, 254, ${fp.alpha})`;
+                ctx.shadowColor = 'rgba(56, 189, 248, 0.8)';
+                ctx.shadowBlur = 8;
+                ctx.textAlign = 'center';
+                ctx.fillText(fp.text, fp.x, fp.y);
+                ctx.restore();
+            }
+        }
+
+        /********************************************************************
+         * 7. MAIN ANIMATION LOOP (WITH 15 ISLAMIC & NATURE THEMES)
+         ********************************************************************/
+        function renderBackgroundByTheme(time) {
+            switch (state.themeIndex) {
+                case 0: drawRainyNightScene(time); break;
+                case 1: drawMakkahKaabaScene(time); break;
+                case 2: drawMadinahLanternScene(time); break;
+                case 3: drawAlAqsaDomeScene(time); break;
+                case 4: drawRamadanFanoosScene(time); break;
+                case 5: drawSunsetMeadowScene(time); break;
+                case 6: drawDesertOasisScene(time); break;
+                case 7: drawAlhambraStarScene(time); break;
+                case 8: drawStarlightFajrScene(time); break;
+                case 9: drawSakuraDawnScene(time); break;
+                case 10: drawIstanbulSunsetScene(time); break;
+                case 11: drawCaveOfHiraScene(time); break;
+                case 12: drawCosmicAuroraScene(time); break;
+                case 13: drawCordobaCourtyardScene(time); break;
+                case 14: drawMilkyWayGalaxyScene(time); break;
+                default: drawRainyNightScene(time); break;
+            }
+        }
+
+        // Dedicated High-Res Vertical Reel Composite Canvas (1080x1920) so recorded video is crystal clear and works reliably across all mobile GPUs
+        const videoCompositeCanvas = document.createElement('canvas');
+        videoCompositeCanvas.width = 1080;
+        videoCompositeCanvas.height = 1920;
+        const vctx = videoCompositeCanvas.getContext('2d');
+
+        function renderCompleteReelFrameToCanvas(targetCanvas, targetCtx) {
+            const W = targetCanvas.width;
+            const H = targetCanvas.height;
+            const scale = W / 720;
+
+            targetCtx.clearRect(0, 0, W, H);
+            targetCtx.drawImage(canvas, 0, 0, W, H);
+
+            const theme = THEMES[state.themeIndex];
+            const watermarkText = document.getElementById('watermarkBtn').textContent || '@zyva';
+
+            // 1. Arabic Calligraphy
+            targetCtx.save();
+            targetCtx.textAlign = 'center';
+            targetCtx.textBaseline = 'middle';
+            targetCtx.fillStyle = '#ffffff';
+            targetCtx.shadowColor = 'rgba(186, 230, 253, 0.7)';
+            targetCtx.shadowBlur = 18 * scale;
+            targetCtx.font = `700 ${Math.round(74 * scale)}px "Amiri", serif`;
+            targetCtx.fillText(state.currentDhikr.arabic, W / 2, H * 0.175);
+            targetCtx.restore();
+
+            // 2. Ornamental Divider + Glowing Diamond
+            const divY = H * 0.235;
+            targetCtx.save();
+            targetCtx.strokeStyle = 'rgba(226, 232, 240, 0.65)';
+            targetCtx.lineWidth = 1.5 * scale;
+            targetCtx.beginPath();
+            targetCtx.moveTo(W / 2 - 140 * scale, divY);
+            targetCtx.lineTo(W / 2 - 12 * scale, divY);
+            targetCtx.moveTo(W / 2 + 12 * scale, divY);
+            targetCtx.lineTo(W / 2 + 140 * scale, divY);
+            targetCtx.stroke();
+
+            targetCtx.translate(W / 2, divY);
+            targetCtx.rotate(Math.PI / 4);
+            targetCtx.fillStyle = theme.accentColor;
+            targetCtx.shadowColor = theme.accentColor;
+            targetCtx.shadowBlur = 10 * scale;
+            const dSize = 8 * scale;
+            targetCtx.fillRect(-dSize / 2, -dSize / 2, dSize, dSize);
+            targetCtx.restore();
+
+            // 3. Transliteration & Meaning
+            targetCtx.save();
+            targetCtx.textAlign = 'center';
+            targetCtx.fillStyle = '#ffffff';
+            targetCtx.font = `600 ${Math.round(30 * scale)}px "Plus Jakarta Sans", sans-serif`;
+            targetCtx.fillText(state.currentDhikr.transliteration, W / 2, H * 0.272);
+
+            targetCtx.fillStyle = 'rgba(226, 232, 240, 0.85)';
+            targetCtx.font = `400 ${Math.round(18 * scale)}px "Plus Jakarta Sans", sans-serif`;
+            targetCtx.fillText(state.currentDhikr.translation, W / 2, H * 0.298);
+            targetCtx.restore();
+
+            // 4. Circular Progress Counter Badge
+            const badgeX = W / 2;
+            const badgeY = H * 0.745;
+            const badgeR = 66 * scale;
+
+            targetCtx.save();
+            targetCtx.fillStyle = 'rgba(12, 26, 38, 0.82)';
+            targetCtx.shadowColor = 'rgba(0, 0, 0, 0.55)';
+            targetCtx.shadowBlur = 16 * scale;
+            targetCtx.beginPath();
+            targetCtx.arc(badgeX, badgeY, badgeR, 0, Math.PI * 2);
+            targetCtx.fill();
+
+            // Track ring
+            targetCtx.shadowBlur = 0;
+            targetCtx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+            targetCtx.lineWidth = 6.5 * scale;
+            targetCtx.beginPath();
+            targetCtx.arc(badgeX, badgeY, badgeR + 2 * scale, 0, Math.PI * 2);
+            targetCtx.stroke();
+
+            // Animated Progress Arc
+            const progress = Math.min(state.count / Math.max(1, state.target), 1);
+            if (progress > 0) {
+                const ringGrad = targetCtx.createLinearGradient(badgeX - badgeR, badgeY - badgeR, badgeX + badgeR, badgeY + badgeR);
+                ringGrad.addColorStop(0, theme.ringColors[0]);
+                ringGrad.addColorStop(0.5, theme.ringColors[1]);
+                ringGrad.addColorStop(1, theme.ringColors[2]);
+                targetCtx.strokeStyle = ringGrad;
+                targetCtx.lineWidth = 6.5 * scale;
+                targetCtx.lineCap = 'round';
+                targetCtx.shadowColor = theme.accentColor;
+                targetCtx.shadowBlur = 10 * scale;
+                targetCtx.beginPath();
+                targetCtx.arc(badgeX, badgeY, badgeR + 2 * scale, -Math.PI / 2, -Math.PI / 2 + progress * Math.PI * 2);
+                targetCtx.stroke();
+            }
+
+            // Counter Numbers
+            targetCtx.shadowBlur = 0;
+            targetCtx.textAlign = 'center';
+            targetCtx.fillStyle = '#ffffff';
+            targetCtx.font = `800 ${Math.round(44 * scale)}px "Plus Jakarta Sans", sans-serif`;
+            targetCtx.fillText(`${state.count}`, badgeX, badgeY + 5 * scale);
+
+            targetCtx.fillStyle = 'rgba(203, 213, 225, 0.85)';
+            targetCtx.font = `600 ${Math.round(16 * scale)}px "Plus Jakarta Sans", sans-serif`;
+            targetCtx.fillText(`/ ${state.target}`, badgeX, badgeY + 30 * scale);
+            targetCtx.restore();
+
+            // 5. Acceptance Du'a when goal is completed
+            if (state.count >= state.target) {
+                targetCtx.save();
+                targetCtx.textAlign = 'center';
+                targetCtx.fillStyle = '#e0f2fe';
+                targetCtx.shadowColor = 'rgba(186, 230, 253, 0.65)';
+                targetCtx.shadowBlur = 10 * scale;
+                targetCtx.font = `700 ${Math.round(30 * scale)}px "Amiri", serif`;
+                targetCtx.fillText('تَقَبَّلَ اللّٰهُ مِنَّا وَمِنْكُمْ', W / 2, H * 0.845);
+
+                targetCtx.shadowBlur = 0;
+                targetCtx.fillStyle = 'rgba(226, 232, 240, 0.9)';
+                targetCtx.font = `500 ${Math.round(15 * scale)}px "Plus Jakarta Sans", sans-serif`;
+                targetCtx.fillText('May Allah accept it from us and from you', W / 2, H * 0.872);
+                targetCtx.restore();
+            }
+
+            // 6. Watermark Handle
+            targetCtx.save();
+            targetCtx.textAlign = 'center';
+            targetCtx.fillStyle = 'rgba(203, 213, 225, 0.72)';
+            targetCtx.font = `600 ${Math.round(16 * scale)}px "Plus Jakarta Sans", sans-serif`;
+            targetCtx.fillText(watermarkText, W / 2, H * 0.92);
+            targetCtx.restore();
+        }
+
+        function animate(time) {
+            ctx.clearRect(0, 0, width, height);
+            renderBackgroundByTheme(time);
+            drawTasbihAndEffects(time);
+
+            // Keep composite video canvas updated whenever recording is active
+            if ((mediaRecorder && mediaRecorder.state === 'recording') || state.isGeneratingFallbackVideo) {
+                renderCompleteReelFrameToCanvas(videoCompositeCanvas, vctx);
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        /********************************************************************
+         * 8. INSTANT 4K ULTRA-HD (2160 x 3840) GOAL COMPLETION GENERATOR
+         ********************************************************************/
+        function openDownloadModalWithBlob(blob, filename, isVideo = true) {
+            const modal = document.getElementById('downloadReadyModal');
+            const videoPrev = document.getElementById('dlVideoPreview');
+            const imgPrev = document.getElementById('dlImagePreview');
+            const spinner = document.getElementById('dlRenderingSpinner');
+            const directLink = document.getElementById('directDownloadLink');
+            const directLinkText = document.getElementById('directDownloadLinkText');
+            const shareBtn = document.getElementById('nativeShareFileBtn');
+
+            if (state.lastDownloadUrl) {
+                try { URL.revokeObjectURL(state.lastDownloadUrl); } catch (e) {}
+            }
+            const url = URL.createObjectURL(blob);
+            state.lastDownloadUrl = url;
+            state.lastDownloadBlob = blob;
+            state.lastDownloadFilename = filename;
+
+            spinner.classList.add('hidden');
+            if (isVideo) {
+                imgPrev.classList.add('hidden');
+                videoPrev.src = url;
+                videoPrev.classList.remove('hidden');
+                videoPrev.play().catch(() => {});
+                document.getElementById('dlModalTitle').textContent = '4K Goal Video Ready!';
+                directLinkText.textContent = `Download Video (${filename.split('.').pop().toUpperCase()})`;
+            } else {
+                videoPrev.pause();
+                videoPrev.classList.add('hidden');
+                imgPrev.src = url;
+                imgPrev.classList.remove('hidden');
+                document.getElementById('dlModalTitle').textContent = '4K Ultra-HD Image Ready!';
+                directLinkText.textContent = 'Download 4K PNG (2160×3840)';
+            }
+
+            directLink.href = url;
+            directLink.download = filename;
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            // Also trigger immediate browser download automatically
+            try {
+                const tempA = document.createElement('a');
+                tempA.style.display = 'none';
+                tempA.href = url;
+                tempA.download = filename;
+                document.body.appendChild(tempA);
+                tempA.click();
+                setTimeout(() => {
+                    if (tempA.parentNode) tempA.parentNode.removeChild(tempA);
+                }, 3000);
+            } catch (e) {}
+
+            // Setup native mobile share button
+            shareBtn.onclick = async () => {
+                try {
+                    const file = new File([blob], filename, { type: blob.type });
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            title: `Sakina — ${state.currentDhikr.transliteration}`,
+                            text: `${state.currentDhikr.transliteration} (${state.target}/${state.target})`,
+                            files: [file]
+                        });
+                    } else {
+                        directLink.click();
+                    }
+                } catch (err) {
+                    directLink.click();
+                }
+            };
+        }
+
+        function downloadCompletedGoalIn4K() {
+            const btnText = document.getElementById('download4kBtnText');
+            const origLabel = btnText.textContent;
+            btnText.textContent = 'Rendering 4K...';
+
+            try {
+                const W = 2160;
+                const H = 3840;
+                const offCanvas = document.createElement('canvas');
+                offCanvas.width = W;
+                offCanvas.height = H;
+                const octx = offCanvas.getContext('2d');
+
+                // Render complete 4K frame using our unified high-resolution renderer
+                renderCompleteReelFrameToCanvas(offCanvas, octx);
+
+                const safeName = state.currentDhikr.transliteration.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+                const filename = `Sakina-${safeName}-${state.target}-4K-2160x3840.png`;
+
+                offCanvas.toBlob((blob) => {
+                    btnText.textContent = '✓ 4K Ready!';
+                    setTimeout(() => { btnText.textContent = '4K Image'; }, 2500);
+                    if (blob) {
+                        openDownloadModalWithBlob(blob, filename, false);
+                    }
+                }, 'image/png', 1.0);
+            } catch (err) {
+                btnText.textContent = origLabel;
+            }
+        }
+
+        /********************************************************************
+         * 9. UI LOGIC, COUNTER INTERACTION & PROGRESS RING
+         ********************************************************************/
+        const countNumberEl = document.getElementById('countNumber');
+        const targetNumberEl = document.getElementById('targetNumber');
+        const progressRingEl = document.getElementById('progressRing');
+        const counterWrapperEl = document.getElementById('counterWrapper');
+        const completionBlessingEl = document.getElementById('completionBlessing');
+
+        const RING_CIRCUMFERENCE = 2 * Math.PI * 46; // r = 46 => ~289.026
+
+        function updateCounterUI(animateBump = true) {
+            countNumberEl.textContent = state.count;
+            targetNumberEl.textContent = `/ ${state.target}`;
+
+            const progress = Math.min(state.count / Math.max(1, state.target), 1);
+            const dashOffset = RING_CIRCUMFERENCE * (1 - progress);
+            progressRingEl.style.strokeDashoffset = dashOffset;
+
+            if (animateBump) {
+                counterWrapperEl.classList.remove('counter-bump');
+                void counterWrapperEl.offsetWidth;
+                counterWrapperEl.classList.add('counter-bump');
+            }
+
+            // Show acceptance blessing + Video & 4K Download buttons when reaching target goal!
+            if (state.count >= state.target) {
+                completionBlessingEl.classList.remove('opacity-0', 'translate-y-2', 'pointer-events-none');
+                completionBlessingEl.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+                document.getElementById('downloadVideoBtnText').textContent = `Download 4K Video (${state.target}/${state.target})`;
+                document.getElementById('download4kBtnText').textContent = `4K Image`;
+            } else {
+                completionBlessingEl.classList.add('opacity-0', 'translate-y-2', 'pointer-events-none');
+                completionBlessingEl.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+            }
+        }
+
+        function incrementCount() {
+            if (state.soundEnabled && !soundEngine.isPlayingAmbient) {
+                soundEngine.startAmbient();
+            }
+
+            if (state.count >= state.target) {
+                resetCounter();
+                return;
+            }
+
+            // Automatically start recording the full Reel video on first bead (manual OR auto)!
+            if (state.count === 0 && (!mediaRecorder || mediaRecorder.state === 'inactive')) {
+                startCanvasVideoRecording();
+            }
+
+            state.count += 1;
+            state.centerPulse = 1.0;
+
+            const baseRadius = Math.min(Math.max(width * 0.043, 18.5), 23.5);
+            const centerPt = getCurvePoint(0, baseRadius * 2.08);
+
+            state.floatingPlusOnes.push({
+                x: centerPt.x + baseRadius * 1.15,
+                y: centerPt.y - baseRadius * 1.45,
+                vy: -0.75,
+                alpha: 1.0,
+                text: '+1'
+            });
+
+            state.ripples.push({
+                r: baseRadius * 1.6,
+                alpha: 0.65
+            });
+
+            const isSeparator = (state.count % 33 === 0);
+            const isComplete = (state.count === state.target);
+            soundEngine.playBeadClick(isSeparator, isComplete);
+
+            if (navigator.vibrate) {
+                if (isComplete) navigator.vibrate([40, 60, 80]);
+                else if (isSeparator) navigator.vibrate(35);
+                else navigator.vibrate(12);
+            }
+
+            updateCounterUI(true);
+
+            if (isComplete) {
+                if (state.autoPlaying) {
+                    toggleAutoPlay(false);
+                }
+                // Finalize the recorded video quickly (450ms) so the video blob is ready before the user taps Download
+                setTimeout(() => {
+                    stopCanvasVideoRecording();
+                }, 450);
+            }
+        }
+
+        function resetCounter() {
+            state.count = 0;
+            state.visualCount = 0;
+            state.centerPulse = 0.6;
+            updateCounterUI(false);
+        }
+
+        /********************************************************************
+         * 10. AUTO-PLAY & GUARANTEED VIDEO REEL RECORDING + DOWNLOAD
+         ********************************************************************/
+        let autoPlayTimer = null;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let pendingDownloadAfterStop = false;
+
+        const autoPlayBtn = document.getElementById('autoPlayBtn');
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const autoPlayLabel = document.getElementById('autoPlayLabel');
+        const downloadVideoBtn = document.getElementById('downloadVideoBtn');
+
+        function getSupportedVideoMime() {
+            const types = [
+                { mime: 'video/mp4;codecs=avc1.42E01E,mp4a.40.2', ext: 'mp4' },
+                { mime: 'video/mp4', ext: 'mp4' },
+                { mime: 'video/webm;codecs=vp9,opus', ext: 'webm' },
+                { mime: 'video/webm;codecs=vp8,opus', ext: 'webm' },
+                { mime: 'video/webm', ext: 'webm' }
+            ];
+            for (const t of types) {
+                if (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t.mime)) {
+                    return t;
+                }
+            }
+            return { mime: '', ext: 'webm' };
+        }
+
+        function createSafeMediaRecorder(canvasStream, includeAudio = true) {
+            const chosen = getSupportedVideoMime();
+            state.recordedVideoExt = chosen.ext;
+
+            if (includeAudio && state.soundEnabled && soundEngine.destNode && soundEngine.destNode.stream) {
+                try {
+                    const combinedStream = new MediaStream([
+                        ...canvasStream.getVideoTracks(),
+                        ...soundEngine.destNode.stream.getAudioTracks()
+                    ]);
+                    const rec = chosen.mime
+                        ? new MediaRecorder(combinedStream, { mimeType: chosen.mime, videoBitsPerSecond: 8000000 })
+                        : new MediaRecorder(combinedStream);
+                    return { rec, chosen };
+                } catch (audioErr) {
+                    // Fallback to video-only stream if mobile browser rejects WebAudio track in MediaRecorder
+                }
+            }
+
+            try {
+                const rec = chosen.mime
+                    ? new MediaRecorder(canvasStream, { mimeType: chosen.mime, videoBitsPerSecond: 8000000 })
+                    : new MediaRecorder(canvasStream);
+                return { rec, chosen };
+            } catch (err) {
+                const rec = new MediaRecorder(canvasStream);
+                return { rec, chosen: { mime: rec.mimeType || 'video/webm', ext: 'webm' } };
+            }
+        }
+
+        function startCanvasVideoRecording() {
+            try {
+                if (!videoCompositeCanvas.captureStream || typeof MediaRecorder === 'undefined') return;
+                if (mediaRecorder && mediaRecorder.state === 'recording') return;
+
+                recordedChunks = [];
+                state.recordedVideoBlob = null;
+                renderCompleteReelFrameToCanvas(videoCompositeCanvas, vctx);
+
+                const canvasStream = videoCompositeCanvas.captureStream(30);
+                const { rec, chosen } = createSafeMediaRecorder(canvasStream, true);
+                mediaRecorder = rec;
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data && e.data.size > 0) recordedChunks.push(e.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    if (recordedChunks.length > 0) {
+                        const mimeType = chosen.mime || mediaRecorder.mimeType || 'video/webm';
+                        state.recordedVideoBlob = new Blob(recordedChunks, { type: mimeType });
+                        if (pendingDownloadAfterStop) {
+                            pendingDownloadAfterStop = false;
+                            const safeName = state.currentDhikr.transliteration.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+                            const filename = `Sakina-${safeName}-4K-Goal-${state.target}.${state.recordedVideoExt || 'mp4'}`;
+                            openDownloadModalWithBlob(state.recordedVideoBlob, filename, true);
+                            document.getElementById('downloadVideoBtnText').textContent = `Download 4K Video (${state.target}/${state.target})`;
+                        }
+                    }
+                };
+
+                mediaRecorder.start(200);
+            } catch (e) {}
+        }
+
+        function stopCanvasVideoRecording() {
+            try {
+                if (mediaRecorder && mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                }
+            } catch (e) {}
+        }
+
+        // Instant On-Demand 4K Goal Video Downloader & Previewer
+        function downloadOrGenerateGoalVideo() {
+            const btnText = document.getElementById('downloadVideoBtnText');
+            const safeName = state.currentDhikr.transliteration.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+
+            // Case 1: Video blob is already recorded and ready! Open preview modal & trigger download immediately
+            if (state.recordedVideoBlob && state.recordedVideoBlob.size > 0) {
+                const filename = `Sakina-${safeName}-4K-Goal-${state.target}.${state.recordedVideoExt || 'mp4'}`;
+                openDownloadModalWithBlob(state.recordedVideoBlob, filename, true);
+                return;
+            }
+
+            // Case 2: Recorder is currently finishing up
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                btnText.textContent = 'Finalizing 4K Video...';
+                pendingDownloadAfterStop = true;
+                stopCanvasVideoRecording();
+                return;
+            }
+
+            // Case 3: Fallback — Open modal with progress spinner and record a 2.5-second animated Goal Completion Reel
+            if (state.isGeneratingFallbackVideo) return;
+            state.isGeneratingFallbackVideo = true;
+
+            const modal = document.getElementById('downloadReadyModal');
+            document.getElementById('dlVideoPreview').classList.add('hidden');
+            document.getElementById('dlImagePreview').classList.add('hidden');
+            document.getElementById('dlRenderingSpinner').classList.remove('hidden');
+            document.getElementById('dlModalTitle').textContent = 'Generating 4K Goal Video...';
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            try {
+                if (state.soundEnabled) {
+                    soundEngine.init();
+                    if (!soundEngine.isPlayingAmbient) soundEngine.startAmbient();
+                    soundEngine.playBeadClick(true, true);
+                }
+
+                renderCompleteReelFrameToCanvas(videoCompositeCanvas, vctx);
+                const stream = videoCompositeCanvas.captureStream(30);
+                const { rec: tempRec, chosen } = createSafeMediaRecorder(stream, true);
+                const chunks = [];
+
+                tempRec.ondataavailable = (ev) => {
+                    if (ev.data && ev.data.size > 0) chunks.push(ev.data);
+                };
+
+                tempRec.onstop = () => {
+                    state.isGeneratingFallbackVideo = false;
+                    const blob = new Blob(chunks, { type: chosen.mime || tempRec.mimeType || 'video/webm' });
+                    state.recordedVideoBlob = blob;
+                    state.recordedVideoExt = chosen.ext;
+                    const filename = `Sakina-${safeName}-4K-Goal-${state.target}.${chosen.ext || 'mp4'}`;
+                    openDownloadModalWithBlob(blob, filename, true);
+                    btnText.textContent = `Download 4K Video (${state.target}/${state.target})`;
+                };
+
+                tempRec.start(150);
+                let elapsed = 0;
+                const progTimer = setInterval(() => {
+                    elapsed += 250;
+                    const pct = Math.min(99, Math.round((elapsed / 2500) * 100));
+                    document.getElementById('dlProgressLabel').textContent = `Rendering 4K Video (${pct}%)...`;
+                    if (elapsed >= 2500) {
+                        clearInterval(progTimer);
+                        if (tempRec.state === 'recording') tempRec.stop();
+                    }
+                }, 250);
+            } catch (err) {
+                state.isGeneratingFallbackVideo = false;
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                downloadCompletedGoalIn4K();
+            }
+        }
+
+        function toggleAutoPlay(forceState) {
+            state.autoPlaying = typeof forceState === 'boolean' ? forceState : !state.autoPlaying;
+
+            if (autoPlayTimer) {
+                clearInterval(autoPlayTimer);
+                autoPlayTimer = null;
+            }
+
+            if (state.autoPlaying) {
+                if (state.count >= state.target) {
+                    resetCounter();
+                }
+                playIcon.classList.add('hidden');
+                pauseIcon.classList.remove('hidden');
+                autoPlayLabel.textContent = 'Pause';
+                autoPlayBtn.classList.add('border-sky-400/50');
+
+                if (state.soundEnabled && !soundEngine.isPlayingAmbient) {
+                    soundEngine.startAmbient();
+                }
+                startCanvasVideoRecording();
+
+                incrementCount();
+                autoPlayTimer = setInterval(() => {
+                    incrementCount();
+                }, state.autoSpeedMs);
+            } else {
+                playIcon.classList.remove('hidden');
+                pauseIcon.classList.add('hidden');
+                autoPlayLabel.textContent = 'Auto Dhikr';
+                autoPlayBtn.classList.remove('border-sky-400/50');
+            }
+        }
+
+        /********************************************************************
+         * 11. EVENT LISTENERS, MANUAL GOAL/TIME MODAL & CUSTOMIZATION
+         ********************************************************************/
+        canvas.addEventListener('pointerdown', (e) => {
+            state.touchStartX = e.clientX;
+            state.touchStartY = e.clientY;
+        });
+
+        canvas.addEventListener('pointerup', (e) => {
+            if (state.touchStartX === null) return;
+            const dx = e.clientX - state.touchStartX;
+            const dy = e.clientY - state.touchStartY;
+            state.touchStartX = null;
+
+            if (Math.hypot(dx, dy) < 30 || dx < -15) {
+                incrementCount();
+            }
+        });
+
+        counterWrapperEl.addEventListener('click', (e) => {
+            e.stopPropagation();
+            incrementCount();
+        });
+
+        // 4K Download Button Click
+        document.getElementById('download4kBtn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            downloadCompletedGoalIn4K();
+        });
+
+        // Recorded Video Download Button Click (Guaranteed Video Export)
+        downloadVideoBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            downloadOrGenerateGoalVideo();
+        });
+
+        // Close Download Ready Modal
+        document.getElementById('closeDlModalBtn').addEventListener('click', () => {
+            const modal = document.getElementById('downloadReadyModal');
+            const videoPrev = document.getElementById('dlVideoPreview');
+            videoPrev.pause();
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        });
+
+        document.getElementById('downloadReadyModal').addEventListener('click', (e) => {
+            if (e.target.id === 'downloadReadyModal') {
+                document.getElementById('dlVideoPreview').pause();
+                e.target.classList.add('hidden');
+                e.target.classList.remove('flex');
+            }
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (!document.getElementById('dhikrModal').classList.contains('hidden')) return;
+            if (!document.getElementById('goalTimeModal').classList.contains('hidden')) return;
+            if (e.code === 'Space' || e.code === 'ArrowLeft' || e.code === 'ArrowUp' || e.code === 'Enter') {
+                e.preventDefault();
+                incrementCount();
+            } else if (e.code === 'KeyR') {
+                resetCounter();
+            }
+        });
+
+        // Theme Switcher
+        function applyTheme(index) {
+            state.themeIndex = index % THEMES.length;
+            const theme = THEMES[state.themeIndex];
+            document.getElementById('themeIcon').textContent = theme.icon;
+            progressRingEl.setAttribute('stroke', theme.ringGrad);
+            progressRingEl.style.filter = `drop-shadow(0 0 6px ${theme.accentColor})`;
+
+            const diamond = document.getElementById('dividerDiamond');
+            diamond.className = `w-2.5 h-2.5 rotate-45 mx-3 transition-colors duration-500 ${theme.diamondClass}`;
+
+            renderThemeGridInModal();
+        }
+
+        document.getElementById('themeBtn').addEventListener('click', () => {
+            applyTheme(state.themeIndex + 1);
+        });
+
+        // Sound Profile Cycle
+        function applySoundProfile(index) {
+            state.soundProfileIndex = index % SOUND_PROFILES.length;
+            const prof = SOUND_PROFILES[state.soundProfileIndex];
+            document.getElementById('soundEmoji').textContent = prof.emoji;
+            document.getElementById('soundNameShort').textContent = prof.short;
+            document.getElementById('soundProfileSelect').value = String(state.soundProfileIndex);
+            soundEngine.updateThemeVolume();
+        }
+
+        document.getElementById('soundProfileBtn').addEventListener('click', () => {
+            applySoundProfile(state.soundProfileIndex + 1);
+            if (state.soundEnabled && !soundEngine.isPlayingAmbient) {
+                soundEngine.startAmbient();
+            }
+        });
+
+        // Sound Mute/Unmute Toggle
+        document.getElementById('soundBtn').addEventListener('click', () => {
+            state.soundEnabled = !state.soundEnabled;
+            document.getElementById('soundOnIcon').classList.toggle('hidden', !state.soundEnabled);
+            document.getElementById('soundOffIcon').classList.toggle('hidden', state.soundEnabled);
+            if (state.soundEnabled) {
+                soundEngine.startAmbient();
+            } else {
+                soundEngine.stopAmbient();
+            }
+        });
+
+        // Auto-Play Toggle & Speed Cycle
+        autoPlayBtn.addEventListener('click', () => toggleAutoPlay());
+
+        const SPEEDS = [
+            { label: '0.6s', ms: 600 },
+            { label: '0.9s', ms: 900 },
+            { label: '1.2s', ms: 1200 },
+            { label: '1.6s', ms: 1600 },
+            { label: '2.2s', ms: 2200 }
+        ];
+        let speedIdx = 2;
+        document.getElementById('speedBtn').addEventListener('click', (e) => {
+            speedIdx = (speedIdx + 1) % SPEEDS.length;
+            state.autoSpeedMs = SPEEDS[speedIdx].ms;
+            e.currentTarget.textContent = SPEEDS[speedIdx].label;
+            if (state.autoPlaying) {
+                toggleAutoPlay(true);
+            }
+        });
+
+        // Clicking Goal button opens the Manual Goal & Time Studio Modal
+        const goalTimeModal = document.getElementById('goalTimeModal');
+        const manualGoalInput = document.getElementById('manualGoalInput');
+        const manualSpeedSecInput = document.getElementById('manualSpeedSecInput');
+        const manualTotalDurationInput = document.getElementById('manualTotalDurationInput');
+        const calculatedTimeHint = document.getElementById('calculatedTimeHint');
+
+        function updateCalculatedTimeHint() {
+            const g = Math.max(1, parseInt(manualGoalInput.value, 10) || state.target);
+            const sec = Math.max(0.2, parseFloat(manualSpeedSecInput.value) || 1.2);
+            const totalSec = Math.round(g * sec);
+            const mins = Math.floor(totalSec / 60);
+            const remSec = totalSec % 60;
+            calculatedTimeHint.textContent = mins > 0 ? `Total: ~${mins}m ${remSec}s` : `Total: ~${totalSec}s`;
+        }
+
+        manualGoalInput.addEventListener('input', () => {
+            if (manualTotalDurationInput.value) {
+                const dur = parseFloat(manualTotalDurationInput.value);
+                const g = Math.max(1, parseInt(manualGoalInput.value, 10) || 1);
+                manualSpeedSecInput.value = Math.max(0.2, (dur / g)).toFixed(2);
+            }
+            updateCalculatedTimeHint();
+        });
+
+        manualSpeedSecInput.addEventListener('input', () => {
+            manualTotalDurationInput.value = '';
+            updateCalculatedTimeHint();
+        });
+
+        manualTotalDurationInput.addEventListener('input', () => {
+            const dur = parseFloat(manualTotalDurationInput.value);
+            const g = Math.max(1, parseInt(manualGoalInput.value, 10) || 1);
+            if (dur > 0) {
+                manualSpeedSecInput.value = Math.max(0.2, (dur / g)).toFixed(2);
+                updateCalculatedTimeHint();
+            }
+        });
+
+        document.querySelectorAll('.quick-goal-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                manualGoalInput.value = btn.getAttribute('data-quick-goal');
+                updateCalculatedTimeHint();
+            });
+        });
+
+        function renderThemeGridInModal() {
+            const grid = document.getElementById('themeSelectorGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            THEMES.forEach((th, idx) => {
+                const active = idx === state.themeIndex;
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = `flex items-center gap-2 p-2.5 rounded-xl border text-left text-xs font-medium transition-all ${
+                    active ? 'bg-sky-500/25 border-sky-400 text-white shadow' : 'bg-slate-900/60 border-white/10 text-slate-300 hover:bg-white/10'
+                }`;
+                b.innerHTML = `<span class="text-base">${th.icon}</span><span class="truncate">${th.name}</span>`;
+                b.addEventListener('click', () => applyTheme(idx));
+                grid.appendChild(b);
+            });
+        }
+
+        function populateStudioSelects() {
+            const soundSel = document.getElementById('soundProfileSelect');
+            soundSel.innerHTML = '';
+            SOUND_PROFILES.forEach((sp, idx) => {
+                const opt = document.createElement('option');
+                opt.value = String(idx);
+                opt.textContent = `${sp.emoji} ${sp.name}`;
+                soundSel.appendChild(opt);
+            });
+            soundSel.value = String(state.soundProfileIndex);
+
+            const beadSel = document.getElementById('beadDesignSelect');
+            beadSel.innerHTML = '';
+            BEAD_PALETTES.forEach((bp, idx) => {
+                const opt = document.createElement('option');
+                opt.value = String(idx);
+                opt.textContent = `📿 ${bp.name}`;
+                beadSel.appendChild(opt);
+            });
+            beadSel.value = String(state.beadPaletteIndex);
+        }
+
+        function openGoalStudioModal() {
+            manualGoalInput.value = state.target;
+            manualSpeedSecInput.value = (state.autoSpeedMs / 1000).toFixed(1);
+            manualTotalDurationInput.value = '';
+            updateCalculatedTimeHint();
+            renderThemeGridInModal();
+            populateStudioSelects();
+            goalTimeModal.classList.remove('hidden');
+            goalTimeModal.classList.add('flex');
+        }
+
+        document.getElementById('openGoalModalBtn').addEventListener('click', openGoalStudioModal);
+        document.getElementById('targetCycleBtn').addEventListener('click', openGoalStudioModal);
+
+        document.getElementById('closeGoalModalBtn').addEventListener('click', () => {
+            goalTimeModal.classList.add('hidden');
+            goalTimeModal.classList.remove('flex');
+        });
+
+        goalTimeModal.addEventListener('click', (e) => {
+            if (e.target === goalTimeModal) {
+                goalTimeModal.classList.add('hidden');
+                goalTimeModal.classList.remove('flex');
+            }
+        });
+
+        function applyGoalStudioSettings(startAutoAfter = false) {
+            const newGoal = Math.min(10000, Math.max(1, parseInt(manualGoalInput.value, 10) || 100));
+            const newSpeedSec = Math.min(20, Math.max(0.2, parseFloat(manualSpeedSecInput.value) || 1.2));
+
+            state.target = newGoal;
+            state.autoSpeedMs = Math.round(newSpeedSec * 1000);
+
+            document.getElementById('targetCycleBtn').textContent = `Goal: ${state.target}`;
+            document.getElementById('speedBtn').textContent = `${newSpeedSec.toFixed(1)}s`;
+
+            const chosenSoundIdx = parseInt(document.getElementById('soundProfileSelect').value, 10) || 0;
+            applySoundProfile(chosenSoundIdx);
+
+            const chosenBeadIdx = parseInt(document.getElementById('beadDesignSelect').value, 10) || 0;
+            applyBeadPalette(chosenBeadIdx);
+
+            if (state.count > state.target) {
+                resetCounter();
+            } else {
+                updateCounterUI(false);
+            }
+
+            goalTimeModal.classList.add('hidden');
+            goalTimeModal.classList.remove('flex');
+
+            if (startAutoAfter) {
+                resetCounter();
+                toggleAutoPlay(true);
+            } else if (state.autoPlaying) {
+                toggleAutoPlay(true);
+            }
+        }
+
+        document.getElementById('saveGoalSettingsBtn').addEventListener('click', () => applyGoalStudioSettings(false));
+        document.getElementById('saveAndStartAutoBtn').addEventListener('click', () => applyGoalStudioSettings(true));
+
+        // Bead Color & Shape Style Cycle Button
+        function applyBeadPalette(index) {
+            state.beadPaletteIndex = index % BEAD_PALETTES.length;
+            const pal = BEAD_PALETTES[state.beadPaletteIndex];
+            const dot = document.getElementById('beadColorDot');
+            dot.style.backgroundColor = pal.dotColor;
+            dot.style.boxShadow = `0 0 6px ${pal.dotColor}`;
+            document.getElementById('beadStyleLabel').textContent = pal.name;
+            const beadSel = document.getElementById('beadDesignSelect');
+            if (beadSel) beadSel.value = String(state.beadPaletteIndex);
+        }
+
+        document.getElementById('beadStyleBtn').addEventListener('click', () => {
+            applyBeadPalette(state.beadPaletteIndex + 1);
+        });
+
+        // Reset Button
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            if (state.autoPlaying) toggleAutoPlay(false);
+            resetCounter();
+        });
+
+        // Zen / Video Recording Mode Toggle
+        const topChrome = document.getElementById('topChrome');
+        const bottomChrome = document.getElementById('bottomChrome');
+        const exitZenBtn = document.getElementById('exitZenBtn');
+
+        function setZenMode(enabled) {
+            state.zenMode = enabled;
+            topChrome.classList.toggle('zen-hidden', enabled);
+            bottomChrome.classList.toggle('zen-hidden-bottom', enabled);
+            exitZenBtn.classList.toggle('hidden', !enabled);
+            exitZenBtn.classList.toggle('flex', enabled);
+        }
+
+        document.getElementById('zenModeBtn').addEventListener('click', () => setZenMode(true));
+        exitZenBtn.addEventListener('click', () => setZenMode(false));
+
+        /********************************************************************
+         * 12. DHIKR SELECTION & CUSTOMIZATION MODAL
+         ********************************************************************/
+        const dhikrModal = document.getElementById('dhikrModal');
+        const dhikrListContainer = document.getElementById('dhikrListContainer');
+
+        function selectDhikr(dhikrObj) {
+            state.currentDhikr = dhikrObj;
+            document.getElementById('arabicText').textContent = dhikrObj.arabic;
+            document.getElementById('transliterationText').textContent = dhikrObj.transliteration;
+            document.getElementById('translationText').textContent = dhikrObj.translation;
+            document.getElementById('currentDhikrChip').textContent = dhikrObj.transliteration;
+
+            if (dhikrObj.defaultTarget) {
+                state.target = dhikrObj.defaultTarget;
+                document.getElementById('targetCycleBtn').textContent = `Goal: ${state.target}`;
+            }
+
+            if (typeof dhikrObj.recommendedTheme === 'number') {
+                applyTheme(dhikrObj.recommendedTheme);
+                const recBead = typeof dhikrObj.recommendedBead === 'number'
+                    ? dhikrObj.recommendedBead
+                    : (dhikrObj.recommendedTheme % BEAD_PALETTES.length);
+                applyBeadPalette(recBead);
+            }
+
+            resetCounter();
+            renderDhikrList();
+        }
+
+        function renderDhikrList() {
+            dhikrListContainer.innerHTML = '';
+            DHIKR_PRESETS.forEach((item) => {
+                const isSelected = state.currentDhikr.id === item.id;
+                const btn = document.createElement('button');
+                btn.className = `w-full text-left p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
+                    isSelected
+                        ? 'bg-sky-500/20 border-sky-400/60 shadow-md'
+                        : 'bg-slate-900/50 border-white/10 hover:bg-white/10'
+                }`;
+                btn.innerHTML = `
+                    <div>
+                        <div class="font-semibold text-sm text-white flex items-center gap-2">
+                            <span>${item.transliteration}</span>
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-sky-200">${item.defaultTarget}x</span>
+                        </div>
+                        <div class="text-xs text-slate-300/80 mt-0.5">${item.translation}</div>
+                    </div>
+                    <div dir="rtl" class="arabic-font text-2xl text-sky-100 shrink-0">${item.arabic}</div>
+                `;
+                btn.addEventListener('click', () => {
+                    selectDhikr(item);
+                    dhikrModal.classList.add('hidden');
+                    dhikrModal.classList.remove('flex');
+                });
+                dhikrListContainer.appendChild(btn);
+            });
+        }
+
+        document.getElementById('openDhikrModalBtn').addEventListener('click', () => {
+            renderDhikrList();
+            dhikrModal.classList.remove('hidden');
+            dhikrModal.classList.add('flex');
+        });
+
+        document.getElementById('watermarkBtn').addEventListener('click', () => {
+            renderDhikrList();
+            dhikrModal.classList.remove('hidden');
+            dhikrModal.classList.add('flex');
+            document.getElementById('customWatermarkInput').focus();
+        });
+
+        document.getElementById('closeModalBtn').addEventListener('click', () => {
+            dhikrModal.classList.add('hidden');
+            dhikrModal.classList.remove('flex');
+        });
+
+        dhikrModal.addEventListener('click', (e) => {
+            if (e.target === dhikrModal) {
+                dhikrModal.classList.add('hidden');
+                dhikrModal.classList.remove('flex');
+            }
+        });
+
+        document.getElementById('applyCustomBtn').addEventListener('click', () => {
+            const customArabic = document.getElementById('customArabicInput').value.trim();
+            const customTitle = document.getElementById('customTitleInput').value.trim();
+            const customMeaning = document.getElementById('customMeaningInput').value.trim();
+            const customWatermark = document.getElementById('customWatermarkInput').value.trim();
+
+            if (customWatermark) {
+                document.getElementById('watermarkBtn').textContent = customWatermark;
+            }
+
+            if (customArabic || customTitle) {
+                selectDhikr({
+                    id: 'custom',
+                    arabic: customArabic || state.currentDhikr.arabic,
+                    transliteration: customTitle || state.currentDhikr.transliteration,
+                    translation: customMeaning || state.currentDhikr.translation,
+                    defaultTarget: state.target
+                });
+            }
+
+            dhikrModal.classList.add('hidden');
+            dhikrModal.classList.remove('flex');
+        });
+
+        // Start the scene immediately once the script is parsed
+        updateCounterUI(false);
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>
